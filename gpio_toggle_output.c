@@ -32,36 +32,115 @@
 
 #include "ti_msp_dl_config.h"
 #include "LowLevelDrivers/inc/gpio.h"
-#include "LowLevelDrivers/inc/adc.h"
+// #include "LowLevelDrivers/inc/adc.h"
 
 /* This results in approximately 0.5s of delay assuming 32MHz CPU_CLK */
 #define DELAY (16000000)
 
+volatile bool gCheckADC;
+volatile uint16_t gAdcResult;
+
 int main(void)
 {
     /* Power on GPIO, initialize pins as digital outputs */
-    SYSCFG_DL_init();
+    // SYSCFG_DL_init();
+    
+    /* Initialize ADC and enable NVIC interrupt */
+    // adc_init(ADC12_0_INST);
 
     /* Default: LED1 and LED3 ON, LED2 OFF */
-    DL_GPIO_clearPins(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_2_PIN);
-    DL_GPIO_setPins(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_1_PIN |
-                                        GPIO_LEDS_USER_LED_3_PIN |
-                                        GPIO_LEDS_USER_TEST_PIN);
-    uint8_t val = 0;
-    while (1) {
-        /*
-         * Call togglePins API to flip the current value of LEDs 1-3. This
-         * API causes the corresponding HW bits to be flipped by the GPIO HW
-         * without need for additional R-M-W cycles by the processor.
-         */
-        delay_cycles(DELAY);
-        // DL_GPIO_togglePins(GPIO_LEDS_PORT,
-            // GPIO_LEDS_USER_LED_1_PIN | GPIO_LEDS_USER_LED_2_PIN |
-                // GPIO_LEDS_USER_LED_3_PIN | GPIO_LEDS_USER_TEST_PIN);
+    DL_GPIO_clearPins(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_2_PIN | GPIO_LEDS_USER_LED_3_PIN | GPIO_LEDS_USER_LED_1_PIN);
+    // DL_GPIO_setPins(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_1_PIN |
+                                        // GPIO_LEDS_USER_LED_3_PIN |
+    //                                     // GPIO_LEDS_USER_TEST_PIN);
+    // float val = 0;
+    // while (1) {
+    //     /*
+    //      * Call togglePins API to flip the current value of LEDs 1-3. This
+    //      * API causes the corresponding HW bits to be flipped by the GPIO HW
+    //      * without need for additional R-M-W cycles by the processor.
+    //      */
+    //     delay_cycles(DELAY);
 
-        val = gpio_read_pin(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_1_PIN);
-        val = ~val;
-        gpio_write_pin(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_1_PIN, val);
+    //     val = adc_get_voltage(ADC12_0_INST);
+
+    //     // DL_GPIO_togglePins(GPIO_LEDS_PORT,
+    //         // GPIO_LEDS_USER_LED_1_PIN | GPIO_LEDS_USER_LED_2_PIN |
+    //             // GPIO_LEDS_USER_LED_3_PIN | GPIO_LEDS_USER_TEST_PIN);
+
+    //     // val = gpio_read_pin(GPIO_LEDS_PORT, GPIO_LEDS_PIN_0_PIN);
+    //     if (val > 1) {
+    //         gpio_write_pin(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_1_PIN, 0);
+    //     } else {
+    //         gpio_write_pin(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_1_PIN, 0);
+    //     }
+
+    //     // gpio_write_pin(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_2_PIN, 1);
+
+    //     // val = gpio_read_pin(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_1_PIN);
+    //     // val = ~val;
+    //     // gpio_write_pin(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_1_PIN, val);
         
+    // }
+
+
+    SYSCFG_DL_init();
+    
+    // Try configuring ADC to read internal temperature sensor instead of external pin
+    // This will test if ADC hardware is working
+    // DL_ADC12_configConversionMem(ADC12_0_INST, DL_ADC12_MEM_IDX_0,
+    //     DL_ADC12_REFERENCE_VOLTAGE_INTREF, 
+    //     DL_ADC12_SAMPLE_TIMER_SOURCE_SCOMP0, DL_ADC12_AVERAGING_MODE_DISABLED,
+    //     DL_ADC12_BURN_OUT_SOURCE_DISABLED, DL_ADC12_TRIGGER_MODE_AUTO_NEXT, 
+    //     DL_ADC12_WINDOWS_COMP_MODE_DISABLED);
+        
+    DL_ADC12_enableConversions(ADC12_0_INST);
+    
+    // Manually configure PA27 as ADC input (Channel 0) to override sysconfig
+    // DL_GPIO_initPeripheralAnalogFunction(IOMUX_PINCM59);
+
+    NVIC_EnableIRQ(ADC12_0_INST_INT_IRQN);
+    gCheckADC = false;
+
+    while (1) {
+        DL_ADC12_startConversion(ADC12_0_INST);
+
+        while (false == gCheckADC) {
+            __WFE();
+        }
+
+        gAdcResult = DL_ADC12_getMemResult(ADC12_0_INST, DL_ADC12_MEM_IDX_0);
+
+        // Debug: Try reading other memory locations and raw registers
+        uint16_t raw_memres = ADC12_0_INST->ULLMEM.MEMRES[0];
+        uint16_t status_reg = ADC12_0_INST->ULLMEM.STATUS;
+        
+        // Test with a known value - try reading internal temperature or voltage reference
+        // This will help us determine if the ADC hardware is working at all
+
+        if (gAdcResult > 0x0) {
+            DL_GPIO_clearPins(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_1_PIN);
+        } else {
+            DL_GPIO_setPins(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_1_PIN);
+        }
+        gpio_toggle_pin(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_2_PIN);
+        gCheckADC = false;
+        DL_ADC12_enableConversions(ADC12_0_INST);
+        // gpio_toggle_pin(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_3_PIN);
+        delay_cycles(DELAY);
     }
 }
+
+
+// void ADC12_0_INST_IRQHandler(void)
+// {
+    
+//     switch (DL_ADC12_getPendingInterrupt(ADC12_0_INST)) {
+//         case DL_ADC12_IIDX_MEM0_RESULT_LOADED:
+            
+//             gCheckADC = true;
+//             break;
+//         default:
+//             break;
+//     }
+// }
