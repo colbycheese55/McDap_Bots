@@ -9,6 +9,8 @@
 #define D_IR 0
 #define IRmaxl 2000
 
+#define FUDGE_FACTOR 5.3 // experimentally determined to match actual distances
+
 
 uint32_t ConvertDistanceSensorReading(uint32_t SensorInput)
 {
@@ -30,8 +32,10 @@ uint32_t ConvertDistanceSensorReading(uint32_t SensorInput)
     return (uint32_t) ReturnValue;
 }
 
-uint16_t get_IR_distance(ADC12_Regs *adc12) {
+uint8_t get_IR_distance(ADC12_Regs *adc12) {
     float percent = adc_get_value(adc12);
     uint32_t reading = (uint32_t)(percent * 4095.0f); // convert back to a 12-bit reading
-    return (uint16_t) ConvertDistanceSensorReading(reading);
+    uint32_t distance = ConvertDistanceSensorReading(reading);
+    distance /= FUDGE_FACTOR; 
+    return (uint8_t) distance;
 }
