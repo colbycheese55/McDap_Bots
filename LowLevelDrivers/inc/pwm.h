@@ -2,7 +2,7 @@
 #define PWM_H_
 
 #include <stdint.h>
-#include "ti_msp_dl_config.h"
+#include "ti_msp_dl_config_PWM.h"
 
 /* Pull in SysConfig + DriverLib + base addresses + CMSIS NOP, etc.
  * This hides all those dependencies from main.c.

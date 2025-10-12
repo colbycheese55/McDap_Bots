@@ -1,4 +1,4 @@
-#include "pwm.h"
+#include "../inc/pwm.h"
 
 /* --- Small helpers --- */
 static inline void set_cc(PWM_Handle *h, uint32_t cmpTicks) {

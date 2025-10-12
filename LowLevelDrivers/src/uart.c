@@ -1,9 +1,8 @@
-#include "uart.h"
+#include "../inc/uart.h"
 
 /* Keep TI includes private to the driver implementation */
 #include <ti/devices/msp/msp.h>
 #include <ti/driverlib/dl_uart_main.h>
-#include "ti_msp_dl_config.h"   // SYSCFG_DL_init(), UART_0_INST, etc.
 
 static inline UART_Regs *U(const UART_Handle *h) {
     return (UART_Regs *)h->inst;

@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "ti_msp_dl_config_UART.h"
 
 #ifdef __cplusplus
 extern "C" {
