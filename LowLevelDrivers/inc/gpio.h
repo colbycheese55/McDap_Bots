@@ -13,7 +13,7 @@
  *
  *  @return     The state of the GPIO pin (0 or 1).
  */
-uint8_t gpio_read_pin(GPIO_Regs* gpio, uint32_t pin) {
+static inline uint8_t gpio_read_pin(GPIO_Regs* gpio, uint32_t pin) {
     return (gpio->DIN31_0 & pin) ? 1 : 0;
 }
 
@@ -24,7 +24,7 @@ uint8_t gpio_read_pin(GPIO_Regs* gpio, uint32_t pin) {
  *  @param[in]  pin       The GPIO pin you want to update. One of @ref DL_GPIO_PIN.
  *  @param[in]  val       The value to set the GPIO pin to (0 or 1).
  */
-void gpio_write_pin(GPIO_Regs* gpio, uint32_t pin, uint8_t val) {
+static inline void gpio_write_pin(GPIO_Regs* gpio, uint32_t pin, uint8_t val) {
     if (val) {
         gpio->DOUTSET31_0 = pin;
     } else {
@@ -38,7 +38,7 @@ void gpio_write_pin(GPIO_Regs* gpio, uint32_t pin, uint8_t val) {
  *  @param[in]  gpio  Pointer to the register overlay for the peripheral
  *  @param[in]  pin   The GPIO pin to toggle. One of @ref DL_GPIO_PIN.
  */
-void gpio_toggle_pin(GPIO_Regs* gpio, uint32_t pin) {
+static inline void gpio_toggle_pin(GPIO_Regs* gpio, uint32_t pin) {
     gpio->DOUTTGL31_0 = pin;
 }
 
