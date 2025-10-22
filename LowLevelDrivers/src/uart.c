@@ -1,68 +1,70 @@
-#include "../inc/uart.h"
+#include "uart.h"
+#include <ti/driverlib/dl_uart_main.h>  // ensure prototypes are visible
 
-/* Keep TI includes private to the driver implementation */
-#include <ti/devices/msp/msp.h>
-#include <ti/driverlib/dl_uart_main.h>
+static UART_Handle g_uart1 = {0};
 
-static inline UART_Regs *U(const UART_Handle *h) {
-    return (UART_Regs *)h->inst;
+static inline UART_Regs *U1(void) {
+    return (UART_Regs *)UART_1_INST;
 }
 
-void UART_boardInit(void)
-{
-    /* Pins/clocks/baud/pinmux come from SysConfig */
-    SYSCFG_DL_init();
+void UART_open(UART_Handle *h) {
+    h->inst = U1();
+    /* SysConfig already did: clock, mux, init, baud, enable.
+       We ensure it's enabled and set a low RX FIFO threshold for snappy reads. */
+    DL_UART_Main_enable(h->inst);
+    DL_UART_Main_setRXFIFOThreshold(h->inst, DL_UART_MAIN_RX_FIFO_LEVEL_ONE_ENTRY);
 }
 
-void UART_open0(UART_Handle *h)
-{
-    h->inst = (void *)UART_0_INST;
-
-    /* Make sure UART is enabled (SysConfig usually does this already) */
-    DL_UART_Main_enable(U(h));
-
-    /* Nice for polling: fire RX check as soon as 1 byte is present */
-    DL_UART_Main_setRXFIFOThreshold(U(h), DL_UART_MAIN_RX_FIFO_LEVEL_ONE_ENTRY);
-
-    /* Clear any stale RX */
-    UART_flushRX(h);
+void UART_initBLE(void) {
+    /* Bind our singleton to UART1 and prep FIFOs */
+    UART_open(&g_uart1);
+    UART_flushRX(&g_uart1);
+    UART_flushTX(&g_uart1);
 }
 
-/* ---------- TX ---------- */
-void UART_putc(UART_Handle *h, uint8_t c)
-{
-    DL_UART_Main_transmitDataBlocking(U(h), c);
+UART_Handle *UART_getBLEHandle(void) {
+    return &g_uart1;
 }
 
-void UART_write(UART_Handle *h, const void *buf, uint32_t len)
-{
-    const uint8_t *p = (const uint8_t *)buf;
+uint8_t UART_getcBlocking(UART_Handle *h) {
+    while (DL_UART_Main_isRXFIFOEmpty(h->inst)) {
+        /* spin */
+    }
+    return (uint8_t)DL_UART_Main_receiveData(h->inst);
+}
+
+void UART_putc(UART_Handle *h, uint8_t c) {
+    /* Wait until UART not busy to ensure space, then send a byte */
+    while (DL_UART_Main_isBusy(h->inst)) { /* spin */ }
+    DL_UART_Main_transmitData(h->inst, c);
+}
+
+void UART_write(UART_Handle *h, const uint8_t *buf, uint32_t len) {
     for (uint32_t i = 0; i < len; ++i) {
-        DL_UART_Main_transmitDataBlocking(U(h), p[i]);
+        UART_putc(h, buf[i]);
     }
 }
 
-void UART_puts(UART_Handle *h, const char *s)
-{
-    while (s && *s) {
-        if (*s == '\n') DL_UART_Main_transmitDataBlocking(U(h), '\r'); // CRLF for friendly terminals
-        DL_UART_Main_transmitDataBlocking(U(h), (uint8_t)*s++);
+void UART_flushRX(UART_Handle *h) {
+    while (!DL_UART_Main_isRXFIFOEmpty(h->inst)) {
+        (void)DL_UART_Main_receiveData(h->inst);
     }
 }
 
-/* ---------- RX ---------- */
-bool UART_tryGetc(UART_Handle *h, uint8_t *out)
-{
-    return DL_UART_Main_receiveDataCheck(U(h), out);  // returns true if a byte was read into *out
+void UART_flushTX(UART_Handle *h) {
+    /* Wait until the UART finishes transmitting everything */
+    while (DL_UART_Main_isBusy(h->inst)) { /* spin */ }
 }
 
-uint8_t UART_getcBlocking(UART_Handle *h)
-{
-    return DL_UART_Main_receiveDataBlocking(U(h));
+/* --------- Compatibility for AP.c --------- */
+uint8_t UART1_InChar(void) {
+    return UART_getcBlocking(&g_uart1);
 }
 
-void UART_flushRX(UART_Handle *h)
-{
-    uint8_t d;
-    while (DL_UART_Main_receiveDataCheck(U(h), &d)) { /* discard */ }
+void UART1_OutChar(uint8_t c) {
+    UART_putc(&g_uart1, c);
+}
+
+void UART1_Write(const uint8_t *buf, uint32_t len) {
+    UART_write(&g_uart1, buf, len);
 }

@@ -3,36 +3,41 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "ti_msp_dl_config_UART.h"
+#include "ti_msp_dl_config.h"
+#include <ti/driverlib/dl_uart_main.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Opaque handle so app code doesn’t include TI headers */
 typedef struct {
-    void *inst;  /* internal UART instance pointer (UART_Regs*) */
+    UART_Regs *inst;   // bound to UART_1_INST
 } UART_Handle;
 
-/* Board bring-up (calls SYSCFG_DL_init from your SysConfig) */
-void UART_boardInit(void);
+/**
+ * @brief Initialize/open the BLE UART (UART1) using the SysConfig settings.
+ * Must be called once after SYSCFG_DL_init().
+ */
+void UART_initBLE(void);
 
-/* Open UART0 using your SysConfig instance (PA10/PA11 @ 9600) */
-void UART_open0(UART_Handle *h);
+/* Generic handle-based API (uses the same global UART1 instance) */
+void    UART_open(UART_Handle *h);                        // binds to UART1
+uint8_t UART_getcBlocking(UART_Handle *h);
+void    UART_putc(UART_Handle *h, uint8_t c);
+void    UART_write(UART_Handle *h, const uint8_t *buf, uint32_t len);
+void    UART_flushRX(UART_Handle *h);
+void    UART_flushTX(UART_Handle *h);
 
-/* TX (blocking) */
-void UART_putc(UART_Handle *h, uint8_t c);
-void UART_write(UART_Handle *h, const void *buf, uint32_t len);
-void UART_puts(UART_Handle *h, const char *s);
+/* Convenience singleton accessor (returns the internal UART1 handle) */
+UART_Handle *UART_getBLEHandle(void);
 
-/* RX */
-bool    UART_tryGetc(UART_Handle *h, uint8_t *out);  /* non-blocking: true if a byte read */
-uint8_t UART_getcBlocking(UART_Handle *h);           /* blocking read */
-
-/* Utilities */
-void UART_flushRX(UART_Handle *h);
+/* --- Compatibility symbols expected by AP.c --- */
+uint8_t UART1_InChar(void);
+void    UART1_OutChar(uint8_t c);
+void    UART1_Write(const uint8_t *buf, uint32_t len);
 
 #ifdef __cplusplus
 }
 #endif
+
 #endif /* UART_H */
