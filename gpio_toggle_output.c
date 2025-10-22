@@ -100,7 +100,7 @@ int main(void)
     // DL_GPIO_initPeripheralAnalogFunction(IOMUX_PINCM59);
 
     NVIC_EnableIRQ(ADC12_0_INST_INT_IRQN);
-    gCheckADC = false;
+    gCheckADC = true;
 
     while (1) {
         DL_ADC12_startConversion(ADC12_0_INST);
@@ -124,7 +124,7 @@ int main(void)
             DL_GPIO_setPins(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_1_PIN);
         }
         gpio_toggle_pin(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_2_PIN);
-        gCheckADC = false;
+        // gCheckADC = false;
         DL_ADC12_enableConversions(ADC12_0_INST);
         // gpio_toggle_pin(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_3_PIN);
         delay_cycles(DELAY);
