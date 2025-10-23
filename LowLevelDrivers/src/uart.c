@@ -1,5 +1,6 @@
-#include "uart.h"
+#include "../inc/uart.h"
 #include <ti/driverlib/dl_uart_main.h>  // ensure prototypes are visible
+#include "ti_msp_dl_config.h"
 
 static UART_Handle g_uart1 = {0};
 
