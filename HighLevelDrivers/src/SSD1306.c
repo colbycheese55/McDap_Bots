@@ -438,7 +438,7 @@ void ssd1306command(uint8_t c) {
   uint16_t count = 2;
   uint8_t buffer[2] = {0, c};
 
-  i2c_send(I2C0, target_address, buffer, count);
+  i2c_send(I2C1, target_address, buffer, count);
 }
 void ssd1306command1(uint8_t c) {
 //  commandwrite(c);
@@ -448,7 +448,7 @@ void ssd1306command1(uint8_t c) {
   uint16_t count = 2;
   uint8_t buffer[2] = {0, c};
 
-  i2c_send(I2C0, target_address, buffer, count);
+  i2c_send(I2C1, target_address, buffer, count);
 
 }
 void ssd1306commandList(const uint8_t *c, uint32_t n) {
@@ -457,7 +457,7 @@ void ssd1306commandList(const uint8_t *c, uint32_t n) {
   int8_t target_address = SSD1306ADDR;
   const uint8_t *buffer = c;
   uint16_t count = (uint16_t)n;
-  i2c_send(I2C0, target_address, (uint8_t *)buffer, count);
+  i2c_send(I2C1, target_address, (uint8_t *)buffer, count);
 //  while(n--) {
 //    commandwrite(*c);
 //    c++;
@@ -542,7 +542,7 @@ int SSD1306_Init(int vccst) {
   // I2C_Init(400,80000); // 100kHz
   uint8_t sclIndex = 9;
   uint8_t sdaIndex = 10;
-  i2c_init(I2C0, sclIndex, sdaIndex);
+  i2c_init(I2C1, sclIndex, sdaIndex);
   vccstate = vccst;
 //  RESET = 0;                            // reset the LCD to a known state, RESET low
 //  for(delay=0; delay<10; delay=delay+1);// delay minimum 100 ns
@@ -1058,7 +1058,7 @@ void SSD1306_OutBuffer(void) {
   int8_t target_address = SSD1306ADDR;
   uint16_t count = (WIDTH*HEIGHT/8);
 
-  i2c_send(I2C0, target_address, buffer, count);
+  i2c_send(I2C1, target_address, buffer, count);
 }
 /*!
     @brief  Fill the whole screen by drawing a 128x64 bitmap image.
@@ -1083,7 +1083,7 @@ void SSD1306_DrawFullImage(const uint8_t *ptr){
   int8_t target_address = SSD1306ADDR;
   uint16_t count = (WIDTH*HEIGHT/8);
 
-  i2c_send(I2C0, target_address, (uint8_t *)ptr, count);
+  i2c_send(I2C1, target_address, (uint8_t *)ptr, count);
 
 //  for(i=0; i<WIDTH*HEIGHT/8; i++){
 //    datawrite(ptr[i]); //SPI version
@@ -1414,7 +1414,7 @@ void SSD1306_OutChar(char data){//int i;
     int8_t target_address = SSD1306ADDR;
     uint16_t count = 6;
 
-    i2c_send(I2C0, target_address, (uint8_t *)&ASCII[data - 0x20], count);
+    i2c_send(I2C1, target_address, (uint8_t *)&ASCII[data - 0x20], count);
 //    for(i=0; i<5; i=i+1){
 //      datawrite(ASCII[data - 0x20][i]);//SPI version
 //    }

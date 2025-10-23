@@ -32,6 +32,7 @@
 
 #include "ti_msp_dl_config.h"
 #include "LowLevelDrivers/inc/gpio.h"
+#include "HighLevelDrivers/inc/SSD1306.h"
 // #include "LowLevelDrivers/inc/adc.h"
 
 /* This results in approximately 0.5s of delay assuming 32MHz CPU_CLK */
@@ -101,6 +102,18 @@ int main(void)
 
     NVIC_EnableIRQ(ADC12_0_INST_INT_IRQN);
     gCheckADC = true;
+
+    // 1. Initialize the OLED using internal voltage source
+    SSD1306_Init(SSD1306_SWITCHCAPVCC);
+
+    // 2. Clear display memory
+    SSD1306_OutClear();
+
+    // 3. Move cursor to top-left (X=0, Y=0)
+    SSD1306_SetCursor(0, 0);
+
+    // 4. Output a string
+    SSD1306_OutString("Hello, world!");
 
     while (1) {
         DL_ADC12_startConversion(ADC12_0_INST);
