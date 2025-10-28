@@ -1,4 +1,4 @@
-#include "gpio.h"
+#include "../inc/gpio.h"
 #include <ti/devices/msp/msp.h>
 #include <ti/driverlib/dl_common.h>
 
