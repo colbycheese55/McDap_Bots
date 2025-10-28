@@ -2,8 +2,6 @@
 #include "../../LowLevelDrivers/inc/gpio.h"
 #include "../../LowLevelDrivers/inc/pwm.h"
 
-#ifdef TI
-
 #define QUADS_PER_REV   (360 * 4)
 #define WHEEL_DIAMETER  1   // TODO
 #define ROBOT_WIDTH     5   // TODO
@@ -116,13 +114,5 @@ void turn_right_in_place(float angle, float speed) {
     motor_set_speed_right(0);
 }
 
-#endif //TI
 
-#ifdef STM
-
-#define QUADS_PER_REV   (360 * 4)
-#define WHEEL_DIAMETER  1   // TODO
-#define ROBOT_WIDTH     5   // TODO
-
-#endif //STM
 
