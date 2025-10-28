@@ -5,6 +5,12 @@
 #include <ti/driverlib/dl_common.h>
 
 
+typedef struct {
+    GPIO_Regs* gpio;
+    uint32_t pin;
+} GPIO_Handle;
+
+
 /**
  *  @brief      Read a GPIO *INPUT* pin)
  *

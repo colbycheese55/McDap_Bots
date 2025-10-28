@@ -14,8 +14,8 @@ void motor_init(Motor_Handle* motor_handle) {
 
     PWM_start(motor.left_motor_forward);
     PWM_start(motor.left_motor_backward);
-    PWM_start(motor.right_motor_forward);
-    PWM_start(motor.right_motor_backward);
+    // PWM_start(motor.right_motor_forward);
+    // PWM_start(motor.right_motor_backward);
 }
 
 void motor_set_speed_left(float speed) {
