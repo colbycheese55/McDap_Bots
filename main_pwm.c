@@ -1,73 +1,86 @@
-// main_pwm.c
+// main_pwm.c  (generic demo for multiple PWM instances)
 #include <stdint.h>
-#include "ti_msp_dl_config.h"   // gives PWM_0_INST, DL_TimerG_*, __NOP
+#include "ti_msp_dl_config.h"      // brings in PWM_0_INST etc. + __NOP
+#include "LowLevelDrivers/inc/pwm.h"
 
-/* crude delay; just for demo pacing */
+// -------- Select which timer instances and CC indices you want to use --------
+// Example 1: both channels on the SAME timer instance (your current config)
+#define PWM_A_BASE   PWM_0_INST
+#define PWM_A_CCIDX  DL_TIMER_CC_0_INDEX   // CC0 (e.g., PA1 in your config)
+
+#define PWM_B_BASE   PWM_0_INST
+#define PWM_B_CCIDX  DL_TIMER_CC_1_INDEX   // CC1 (e.g., PA0 LED in your config)
+
+// Example 2 (uncomment to use different timers if you add PWM_1_INST later):
+// #define PWM_A_BASE   PWM_0_INST
+// #define PWM_A_CCIDX  DL_TIMER_CC_0_INDEX
+// #define PWM_B_BASE   PWM_1_INST
+// #define PWM_B_CCIDX  DL_TIMER_CC_0_INDEX
+
+// Timer clock (Hz). Your SysConfig sets BUSCLK = 32 MHz.
+#define TIMER_CLK_HZ   32000000u
+
 static void delay_ms(uint32_t ms)
 {
-    volatile uint32_t cycles = ms * 32000u; // ~32 MHz -> ~1ms per 32000 loops
+    volatile uint32_t cycles = ms * 1000u; // ~1ms per 32k loops at 32 MHz (rough)
     while (cycles--) { __NOP(); }
-}
-
-/* Set duty (0.0..1.0) on CC0 or CC1 for the given LOAD. */
-static void pwm_set_duty(uint8_t cc_index, uint32_t load, float duty)
-{
-    if (duty < 0.0f) duty = 0.0f;
-    if (duty > 1.0f) duty = 1.0f;
-
-    uint32_t cmp = (uint32_t)((float)load * duty + 0.5f);
-    if (cmp > load) cmp = load;
-
-    DL_TimerG_setCaptureCompareValue(PWM_0_INST, cmp, cc_index);
 }
 
 int main(void)
 {
-    SYSCFG_DL_init();  // pin mux: CC0->PA1 (unobservable), CC1->PA0 (LED)
+    SYSCFG_DL_init();  // pinmux + power + peripheral init (from SysConfig)
 
-    /* Friendlier LED frequency: 1 kHz → LOAD=32000 at 32 MHz */
-    const uint32_t load = 32000u;
-    DL_TimerG_setLoadValue(PWM_0_INST, load);
+    // Open two logical PWM channels using the generic driver
+    PWM_Handle chA, chB;
 
-    /* ===== Case 1: BOTH ON =====
-       CC0 @ 60% (PA1, not visible), CC1 @ 30% (PA0 LED will “dim”) */
-    pwm_set_duty(DL_TIMER_CC_0_INDEX, load, 0.60f);  // PA1 (not visible)
-    pwm_set_duty(DL_TIMER_CC_1_INDEX, load, 0.30f);  // PA0 LED visible
-    DL_TimerG_startCounter(PWM_0_INST);
+    // Choose a human-visible PWM frequency for LED demos (1 kHz)
+    const uint32_t pwmHz = 1000u;
+
+    // Initialize both channels (can be same base or different bases)
+    PWM_init(&chA, PWM_A_BASE, PWM_A_CCIDX, TIMER_CLK_HZ, pwmHz, 0.60f); // 60%
+    PWM_init(&chB, PWM_B_BASE, PWM_B_CCIDX, TIMER_CLK_HZ, pwmHz, 0.30f); // 30%
+
+    // Start both underlying timers. (If both channels use the same base,
+    // starting twice is harmless.)
+    PWM_start(&chA);
+    PWM_start(&chB);
+
+    // ===== Case 1: BOTH ON =====
+    // A = 60%, B = 30% (adjust to taste)
+    PWM_setDuty(&chA, 0.60f);
+    PWM_setDuty(&chB, 0.30f);
     delay_ms(1500);
 
-    /* ===== Case 2: ONLY CC0 ON =====
-       Park CC1 by setting duty to 0% → PA0 LED steady/off.
-       CC0 keeps PWM (still not visible without a probe on PA1). */
-    pwm_set_duty(DL_TIMER_CC_1_INDEX, load, 0.0f);   // PA0 steady
-    pwm_set_duty(DL_TIMER_CC_0_INDEX, load, 0.70f);  // PA1 running (unseen)
+    // ===== Case 2: ONLY A ON =====
+    // Park B by setting duty to 0% (steady level). A keeps PWM’ing.
+    PWM_setDuty(&chB, 0.0f);
+    PWM_setDuty(&chA, 0.70f);
     delay_ms(1500);
 
-    /* ===== Case 3: ONLY CC1 ON =====
-       Park CC0 (0%), run CC1 (LED) at 80% → PA0 LED bright PWM. */
-    pwm_set_duty(DL_TIMER_CC_0_INDEX, load, 0.0f);   // PA1 parked
-    pwm_set_duty(DL_TIMER_CC_1_INDEX, load, 0.80f);  // PA0 LED PWM
+    // ===== Case 3: ONLY B ON =====
+    // Park A; run B.
+    PWM_setDuty(&chA, 0.0f);
+    PWM_setDuty(&chB, 0.80f);
     delay_ms(1500);
 
-    /* Loop: repeat the three cases so you can observe on PA0 */
+    // Loop through the 3 behaviors so you can observe easily
     while (1) {
         // both on
-        pwm_set_duty(DL_TIMER_CC_0_INDEX, load, 0.50f);
-        pwm_set_duty(DL_TIMER_CC_1_INDEX, load, 0.10f);  // PA0 visible
+        PWM_setDuty(&chA, 0.50f);
+        PWM_setDuty(&chB, 0.0f);
         delay_ms(1000);
 
-        // only CC0 (PA0 steady)
-        pwm_set_duty(DL_TIMER_CC_1_INDEX, load, 0.0f);
-        pwm_set_duty(DL_TIMER_CC_0_INDEX, load, 0.70f);
+        // only A
+        PWM_setDuty(&chB, 0.0f);
+        PWM_setDuty(&chA, 0.70f);
         delay_ms(1000);
 
-        // only CC1 (PA0 PWM)
-        pwm_set_duty(DL_TIMER_CC_0_INDEX, load, 0.0f);
-        pwm_set_duty(DL_TIMER_CC_1_INDEX, load, 0.50f);
+        // only B
+        PWM_setDuty(&chA, 0.0f);
+        PWM_setDuty(&chB, 0.80f);
         delay_ms(1000);
     }
 }
-
 
 
 
