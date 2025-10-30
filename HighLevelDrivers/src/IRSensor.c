@@ -32,8 +32,8 @@ uint32_t ConvertDistanceSensorReading(uint32_t SensorInput)
     return (uint32_t) ReturnValue;
 }
 
-uint8_t get_IR_distance(ADC12_Regs *adc12) {
-    float percent = adc_get_value(adc12);
+uint8_t get_IR_distance(ADC_Handle *adc) {
+    float percent = adc_get_value(adc);
     uint32_t reading = (uint32_t)(percent * 4095.0f); // convert back to a 12-bit reading
     uint32_t distance = ConvertDistanceSensorReading(reading);
     distance /= FUDGE_FACTOR; 
