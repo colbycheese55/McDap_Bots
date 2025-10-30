@@ -1,6 +1,5 @@
 #include "../inc/gpio.h"
-#include <ti/devices/msp/msp.h>
-#include <ti/driverlib/dl_common.h>
+
 
 uint8_t gpio_read_pin(GPIO_Port* port, uint32_t pin) {
     GPIO_Regs *gpio = (GPIO_Regs *)port;
