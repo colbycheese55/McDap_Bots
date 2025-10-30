@@ -1,21 +1,25 @@
 #include "../inc/gpio.h"
 
-
-uint8_t gpio_read_pin(GPIO_Port* port, uint32_t pin) {
-    GPIO_Regs *gpio = (GPIO_Regs *)port;
-    return (gpio->DIN31_0 & pin) ? 1 : 0;
+void gpio_init(GPIO_Handle* gpio, size_t port, uint32_t pin){
+    gpio->port = (GPIO_Regs*) port;
+    gpio->pin = pin;
 }
 
-void gpio_write_pin(GPIO_Port* port, uint32_t pin, uint8_t val) {
-    GPIO_Regs *gpio = (GPIO_Regs *)port;
+uint8_t gpio_read_pin(GPIO_Handle* gpio) {
+    GPIO_Regs *port = gpio->port;
+    return (port->DIN31_0 & gpio->pin) ? 1 : 0;
+}
+
+void gpio_write_pin(GPIO_Handle* gpio, uint8_t val) {
+    GPIO_Regs *port = gpio->port;
     if (val) {
-        gpio->DOUTSET31_0 = pin;
+        port->DOUTSET31_0 = gpio->pin;
     } else {
-        gpio->DOUTCLR31_0 = pin;
+        port->DOUTCLR31_0 = gpio->pin;
     }
 }
 
-void gpio_toggle_pin(GPIO_Port* port, uint32_t pin) {
-    GPIO_Regs *gpio = (GPIO_Regs *)port;
-    gpio->DOUTTGL31_0 = pin;
+void gpio_toggle_pin(GPIO_Handle* gpio) {
+    GPIO_Regs *port = gpio->port;
+    port->DOUTTGL31_0 = gpio->pin;
 }

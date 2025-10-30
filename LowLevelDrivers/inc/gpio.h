@@ -19,6 +19,7 @@ typedef struct {
 #else //TI MSPM0
 #include <ti/devices/msp/msp.h>
 #include <ti/driverlib/dl_common.h>
+#include <stddef.h>
 
 typedef struct {
 	GPIO_Regs* port;
