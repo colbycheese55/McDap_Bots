@@ -1,17 +1,15 @@
 #include "../inc/adc.h"
-#include "ti_msp_dl_config.h"
-
 
 volatile bool adcDone = false; // ADC conversion completion flag
 
 void adc_start_conversion(ADC_Handle *adc) {
-	ADC12_Regs *adc12 = (GPIO_Regs *)adc;
+	ADC12_Regs *adc12 = adc->adc12;
     adc12->ULLMEM.CTL1 |= (ADC12_CTL1_SC_START);
 }
 
-uint16_t adc_get_memory_result(const ADC_Handle *adc, uint32_t channel) {
-	ADC12_Regs *adc12 = (GPIO_Regs *)adc;
-	DL_ADC12_MEM_IDX idx = (DL_ADC12_MEM_IDX) channel;
+uint16_t adc_get_memory_result(const ADC_Handle *adc) {
+	ADC12_Regs *adc12 = adc->adc12;
+	DL_ADC12_MEM_IDX idx =  adc->channel;
 
     volatile const uint32_t *pReg = &adc12->ULLMEM.MEMRES[idx];
 
@@ -19,12 +17,12 @@ uint16_t adc_get_memory_result(const ADC_Handle *adc, uint32_t channel) {
 }
 
 void adc_enable_conversions(ADC_Handle *adc) {
-	ADC12_Regs *adc12 = (GPIO_Regs *)adc;
+	ADC12_Regs *adc12 = adc->adc12;
     adc12->ULLMEM.CTL0 |= (ADC12_CTL0_ENC_ON);
 }
 
 float adc_get_value(ADC_Handle *adc) {
-	ADC12_Regs *adc12 = (GPIO_Regs *)adc;
+	ADC12_Regs *adc12 = adc->adc12;
     adc_start_conversion(adc12);
     while (!adcDone) {
         __WFE();
@@ -37,7 +35,7 @@ float adc_get_value(ADC_Handle *adc) {
 }
 
 float adc_get_voltage(ADC_Handle *adc) {
-	ADC12_Regs *adc12 = (GPIO_Regs *)adc;
+	ADC12_Regs *adc12 = adc->adc12;
     return adc_get_value(adc12) * 3.3f;
 }
 
