@@ -13,8 +13,6 @@ const ADC12  = scripting.addModule("/ti/driverlib/ADC12", {}, false);
 const ADC121 = ADC12.addInstance();
 const GPIO   = scripting.addModule("/ti/driverlib/GPIO", {}, false);
 const GPIO1  = GPIO.addInstance();
-const I2C    = scripting.addModule("/ti/driverlib/I2C", {}, false);
-const I2C1   = I2C.addInstance();
 const SYSCTL = scripting.addModule("/ti/driverlib/SYSCTL");
 
 /**
@@ -42,12 +40,6 @@ GPIO1.associatedPins[4].$name       = "PIN_0";
 GPIO1.associatedPins[4].direction   = "INPUT";
 GPIO1.associatedPins[4].pin.$assign = "PB12";
 
-I2C1.$name                     = "I2C_0";
-I2C1.peripheral.sdaPin.$assign = "PB3";
-I2C1.peripheral.sclPin.$assign = "PB2";
-I2C1.sdaPinConfig.$name        = "ti_driverlib_gpio_GPIOPinGeneric1";
-I2C1.sclPinConfig.$name        = "ti_driverlib_gpio_GPIOPinGeneric2";
-
 SYSCTL.forceDefaultClkConfig = true;
 SYSCTL.clockTreeEn           = true;
 
@@ -64,4 +56,3 @@ Board.peripheral.swdioPin.$suggestSolution   = "PA19";
 GPIO1.associatedPins[0].pin.$suggestSolution = "PB22";
 GPIO1.associatedPins[1].pin.$suggestSolution = "PB26";
 GPIO1.associatedPins[2].pin.$suggestSolution = "PB27";
-I2C1.peripheral.$suggestSolution             = "I2C1";
