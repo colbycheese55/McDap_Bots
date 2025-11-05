@@ -39,3 +39,5 @@ uint8_t get_IR_distance(ADC12_Regs *adc12) {
     distance /= FUDGE_FACTOR; 
     return (uint8_t) distance;
 }
+
+
