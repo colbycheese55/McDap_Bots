@@ -1,35 +1,32 @@
 #ifndef PWM_H_
 #define PWM_H_
 
-#include <stdint.h>
-#include "ti_msp_dl_config.h"
+#include "ti_msp_dl_config.h"        // brings in msp.h + dl_core.h
+#include <ti/driverlib/dl_timer.h>   // DL_TimerG_* APIs + GPTIMER_Regs
 
-/* Pull in SysConfig + DriverLib + base addresses + CMSIS NOP, etc.
- * This hides all those dependencies from main.c.
- */
-
-/* Channel mapping: 0 = CCP0 (PA1), 1 = CCP1 (PA0 / red LED via J4) */
 typedef struct {
-    uint8_t  channel;
-    uint32_t clkFreq;
-    uint32_t periodTicks;
+    GPTIMER_Regs *base;   // <-- correct type
+    uint8_t       ccIndex; // DL_TIMER_CC_0_INDEX or DL_TIMER_CC_1_INDEX
+    uint32_t      clkHz;
+    uint32_t      period;
+    float         duty;    // 0.0..1.0
 } PWM_Handle;
 
-/* Board/system init (wraps SYSCFG_DL_init). Call this once at boot. */
-void PWM_boardInit(void);
+void PWM_init(PWM_Handle *h,
+              GPTIMER_Regs *base,
+              uint8_t ccIndex,
+              uint32_t clkHz,
+              uint32_t pwmHz,
+              float duty);
 
-/* Initialize PWM on PWM_0_INST with frequency and duty cycle */
-void PWM_init(PWM_Handle *h, uint8_t channel,
-              uint32_t clkFreq, uint32_t pwmFreq, float duty);
-
-/* Update duty cycle (0.0 – 1.0) */
 void PWM_setDuty(PWM_Handle *h, float duty);
+void PWM_setFrequency(PWM_Handle *h, uint32_t pwmHz);
 
-/* Update PWM frequency (Hz) */
-void PWM_setFrequency(PWM_Handle *h, uint32_t pwmFreq);
+static inline void PWM_start(PWM_Handle *h) { DL_TimerG_startCounter(h->base); }
+static inline void PWM_stop (PWM_Handle *h) { DL_TimerG_stopCounter(h->base);  }
 
-/* Start/stop timer */
-void PWM_start(PWM_Handle *h);
-void PWM_stop(PWM_Handle *h);
+static inline void PWM_disableChannel(PWM_Handle *h) { PWM_setDuty(h, 0.0f); }
+static inline void PWM_enableChannel (PWM_Handle *h) { PWM_setDuty(h, h->duty); }
 
 #endif /* PWM_H_ */
+
