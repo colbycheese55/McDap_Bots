@@ -1,9 +1,16 @@
 #ifndef GPIO_H
 #define GPIO_H
 
+
 #include <stdint.h>
+
+#ifdef STM32G071xx
+#include "stm32g0xx_hal.h"
+
+#else
 #include <ti/devices/msp/msp.h>
 #include <ti/driverlib/dl_common.h>
+#endif
 
 /**
  * @brief Generic GPIO port handle.
