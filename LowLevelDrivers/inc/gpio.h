@@ -15,13 +15,6 @@ typedef struct {
     uint32_t pin;      /**< Pin number within the GPIO port */
 } GPIO_Handle;
 
-
-typedef struct {
-    GPIO_Regs* gpio;
-    uint32_t pin;
-} GPIO_Handle;
-
-
 /**
  *  @brief      Read a GPIO *INPUT* pin
  *
