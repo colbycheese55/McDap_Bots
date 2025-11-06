@@ -1,9 +1,5 @@
 #include "../inc/gpio.h"
 
-void gpio_init(GPIO_Handle* gpio, size_t port, uint32_t pin){
-    gpio->port = (GPIO_Regs*) port;
-    gpio->pin = pin;
-}
 
 uint8_t gpio_read_pin(GPIO_Handle handle) {
     GPIO_Regs *gpio = (GPIO_Regs *)handle.peripheral;
