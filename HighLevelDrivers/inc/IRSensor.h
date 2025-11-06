@@ -1,3 +1,6 @@
+#ifndef IRSENSOR_H_
+#define IRSENSOR_H_
+
 #include "../../LowLevelDrivers/inc/adc.h"
 
 // Returns the measured distance in mm
@@ -5,5 +8,4 @@
 uint8_t get_IR_distance(ADC12_Regs *adc12);
 
 
-
-
+#endif /* IRSENSOR_H_ */

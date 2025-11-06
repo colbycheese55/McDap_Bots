@@ -1,3 +1,6 @@
+#ifndef ADC_H_
+#define ADC_H_
+
 #include "ti_msp_dl_config.h"
 
 
@@ -16,3 +19,5 @@ float adc_get_value(ADC12_Regs *adc12);
 
 // read the ADC for the current voltage, returns a float between 0.0 and 3.3
 float adc_get_voltage(ADC12_Regs *adc12);
+
+#endif /* ADC_H_ */

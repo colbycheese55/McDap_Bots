@@ -24,10 +24,10 @@ typedef struct {
     PWM_Handle* right_motor_forward;
     PWM_Handle* right_motor_backward;
 
-    GPIO_Handle* left_encoder_a;
-    GPIO_Handle* left_encoder_b;
-    GPIO_Handle* right_encoder_a;
-    GPIO_Handle* right_encoder_b;
+    GPIO_Handle left_encoder_a;
+    GPIO_Handle left_encoder_b;
+    GPIO_Handle right_encoder_a;
+    GPIO_Handle right_encoder_b;
 } Motor_Handle;
 
 

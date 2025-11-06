@@ -3,11 +3,12 @@
 #include "../../LowLevelDrivers/inc/pwm.h"
 
 #define QUADS_PER_REV   (360 * 4)
-#define WHEEL_DIAMETER  1   // TODO
-#define ROBOT_WIDTH     5   // TODO
+#define WHEEL_DIAMETER  70    // in mm
+#define ROBOT_WIDTH     146   // in mm
 
 Motor_Handle motor;
-uint8_t quads_state[2] = {0, 0};
+uint8_t quads_state_left[2] = {0, 0};
+uint8_t quads_state_right[2] = {0, 0};
 
 void motor_init(Motor_Handle* motor_handle) {
     motor = *motor_handle;
@@ -41,15 +42,27 @@ void motor_set_speed_right(float speed) {
 }
 
 // helper function
-void wait_on_quads(uint32_t quads) {
+void wait_on_quads_left(uint32_t quads) {
     uint32_t count = 0;
     while (count < quads) {
-        uint8_t a = gpio_read_pin(motor.encoder_a_port, motor.encoder_a_pin);
-        uint8_t b = gpio_read_pin(motor.encoder_b_port, motor.encoder_b_pin);
-        
-        if (a != quads_state[0] || b != quads_state[1]) {
-            quads_state[0] = a;
-            quads_state[1] = b;
+        uint8_t a = gpio_read_pin(motor.left_encoder_a);
+        uint8_t b = gpio_read_pin(motor.left_encoder_b);
+        if (a != quads_state_left[0] || b != quads_state_left[1]) {
+            quads_state_left[0] = a;
+            quads_state_left[1] = b;
+            count++;
+        }
+    }
+}
+
+void wait_on_quads_right(uint32_t quads) {
+    uint32_t count = 0;
+    while (count < quads) {
+        uint8_t a = gpio_read_pin(motor.right_encoder_a);
+        uint8_t b = gpio_read_pin(motor.right_encoder_b);
+        if (a != quads_state_right[0] || b != quads_state_right[1]) {
+            quads_state_right[0] = a;
+            quads_state_right[1] = b;
             count++;
         }
     }
@@ -60,7 +73,7 @@ void drive_straight_distance(float distance, float speed) {
     motor_set_speed_right(speed);
 
     float quads_needed = (distance / (3.14159 * WHEEL_DIAMETER)) * QUADS_PER_REV;
-    wait_on_quads((int)quads_needed);
+    wait_on_quads_left((int)quads_needed);
 
     motor_set_speed_left(0);
     motor_set_speed_right(0);
@@ -72,7 +85,7 @@ void turn_left(float angle, float speed) {
 
     float turn_circumference = 3.14159 * ROBOT_WIDTH * 2 * (angle / 360.0f);
     float quads_needed = (turn_circumference / (3.14159 * WHEEL_DIAMETER)) * QUADS_PER_REV;
-    wait_on_quads((int)quads_needed);
+    wait_on_quads_left((int)quads_needed);
 
     motor_set_speed_left(0);
     motor_set_speed_right(0);
@@ -84,7 +97,7 @@ void turn_right(float angle, float speed) {
 
     float turn_circumference = 3.14159 * ROBOT_WIDTH * 2 * (angle / 360.0f);
     float quads_needed = (turn_circumference / (3.14159 * WHEEL_DIAMETER)) * QUADS_PER_REV;
-    wait_on_quads((int)quads_needed);
+    wait_on_quads_right((int)quads_needed);
 
     motor_set_speed_left(0);
     motor_set_speed_right(0);
@@ -96,7 +109,7 @@ void turn_left_in_place(float angle, float speed) {
 
     float turn_circumference = 3.14159 * ROBOT_WIDTH * (angle / 360.0f);
     float quads_needed = (turn_circumference / (3.14159 * WHEEL_DIAMETER)) * QUADS_PER_REV;
-    wait_on_quads((int)quads_needed);
+    wait_on_quads_left((int)quads_needed);
 
     motor_set_speed_left(0);
     motor_set_speed_right(0);
@@ -108,7 +121,7 @@ void turn_right_in_place(float angle, float speed) {
 
     float turn_circumference = 3.14159 * ROBOT_WIDTH * (angle / 360.0f);
     float quads_needed = (turn_circumference / (3.14159 * WHEEL_DIAMETER)) * QUADS_PER_REV;
-    wait_on_quads((int)quads_needed);
+    wait_on_quads_right((int)quads_needed);
 
     motor_set_speed_left(0);
     motor_set_speed_right(0);
