@@ -48,9 +48,12 @@ policies, either expressed or implied, of the FreeBSD Project.
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include "../inc/SSD1306.h"
 #include "../../LowLevelDrivers/inc/i2c.h"
 #include "../../LowLevelDrivers/inc/clock.h"
+
+#define I2C_FIFO_MAX   8
 // #include "../inc/CortexM.h"
 #define USEprintf 0
 // Tested for four possible hardware connections 
@@ -383,6 +386,7 @@ static const uint8_t ASCII[][6] = {
   {0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // char =  254
   {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}   // char =  255
 };
+
 #define ssd1306_swap(a, b) \
 (((a) ^= (b)), ((b) ^= (a)), ((a) ^= (b))) ///< No-temp-var swap operation
 
@@ -438,7 +442,7 @@ void ssd1306command(uint8_t c) {
   uint16_t count = 2;
   uint8_t buffer[2] = {0, c};
 
-  i2c_send(I2C0, target_address, buffer, count);
+  i2c_send(I2C1, target_address, buffer, count);
 }
 void ssd1306command1(uint8_t c) {
 //  commandwrite(c);
@@ -448,16 +452,18 @@ void ssd1306command1(uint8_t c) {
   uint16_t count = 2;
   uint8_t buffer[2] = {0, c};
 
-  i2c_send(I2C0, target_address, buffer, count);
+  i2c_send(I2C1, target_address, buffer, count);
 
 }
 void ssd1306commandList(const uint8_t *c, uint32_t n) {
   // added 0 in front of each list
   // I2C_Send(SSD1306ADDR,(uint8_t *)c,n);
   int8_t target_address = SSD1306ADDR;
-  const uint8_t *buffer = c;
-  uint16_t count = (uint16_t)n;
-  i2c_send(I2C0, target_address, (uint8_t *)buffer, count);
+  uint8_t buffer[n + 1];
+  buffer[0] = 0x00;
+  memcpy(&buffer[1], c, n);
+  uint16_t count = (uint16_t)n + 1;
+  i2c_send(I2C1, target_address, (uint8_t *)buffer, count);
 //  while(n--) {
 //    commandwrite(*c);
 //    c++;
@@ -504,30 +510,25 @@ void ssd1306commandList(const uint8_t *c, uint32_t n) {
 // */
 // Init sequence, added 0 for command
 static const uint8_t init1[] = {
-  0, // D/C = 0 for command
   SSD1306_DISPLAYOFF,                   // 0xAE
   SSD1306_SETDISPLAYCLOCKDIV,           // 0xD5
   0x80,                                 // the suggested ratio 0x80
   SSD1306_SETMULTIPLEX };               // 0xA8
 static const uint8_t init2[] = {
-  0, // D/C = 0 for command
   SSD1306_SETDISPLAYOFFSET,             // 0xD3
   0x0,                                  // no offset
   SSD1306_SETSTARTLINE | 0x0,           // line #0
   SSD1306_CHARGEPUMP };                 // 0x8D
 static const uint8_t init3[] = {
-  0, // D/C = 0 for command
   SSD1306_MEMORYMODE,                   // 0x20
   0x00,                                 // 0x0 act like Nokia 5110
   SSD1306_SEGREMAP | 0x1,
   SSD1306_COMSCANDEC };
 static const uint8_t init4b[] = {
-  0, // D/C = 0 for command
   SSD1306_SETCOMPINS,                 // 0xDA
   0x12,
   SSD1306_SETCONTRAST };              // 0x81
 static const uint8_t init5[] = {
-  0, // D/C = 0 for command
   SSD1306_SETVCOMDETECT,               // 0xDB
   0x40,
   SSD1306_DISPLAYALLON_RESUME,         // 0xA4
@@ -538,11 +539,12 @@ static const uint8_t init5[] = {
 //            SSD1306_EXTERNALVCC for separate external power
 int SSD1306_Init(int vccst) {
 //  volatile uint32_t delay;
-  ClockDelay_1ms(300);
+  // ClockDelay_1ms(300);
+
   // I2C_Init(400,80000); // 100kHz
-  uint8_t sclIndex = 9;
-  uint8_t sdaIndex = 10;
-  i2c_init(I2C0, sclIndex, sdaIndex);
+  uint8_t sclIndex = 14; // referring to Delong's I2C code. Apparently the program uses 0-based indexing, so index 14 refers to index 15 on the datasheet for PIN Control Management Register indices
+  uint8_t sdaIndex = 15;
+  i2c_init(I2C1, sclIndex, sdaIndex);
   vccstate = vccst;
 //  RESET = 0;                            // reset the LCD to a known state, RESET low
 //  for(delay=0; delay<10; delay=delay+1);// delay minimum 100 ns
@@ -1058,7 +1060,25 @@ void SSD1306_OutBuffer(void) {
   int8_t target_address = SSD1306ADDR;
   uint16_t count = (WIDTH*HEIGHT/8);
 
-  i2c_send(I2C0, target_address, buffer, count);
+  uint8_t *ptr = buffer;
+  uint16_t chunk_size = I2C_FIFO_MAX - 1;  // reserve 1 byte for control byte
+
+  while (count > 0) {
+    uint16_t bytes_to_send = (count > chunk_size) ? chunk_size : count;
+
+    // local transmission buffer (1 control byte + data bytes)
+    uint8_t txbuf[I2C_FIFO_MAX];
+    txbuf[0] = 0x40;  // -0x40 to indicate Data Byte
+
+    memcpy(&txbuf[1], ptr, bytes_to_send);
+
+    // send control byte + this chunk of data
+    i2c_send(I2C1, target_address, txbuf, bytes_to_send + 1);
+
+    // advance buffer pointer
+    ptr += bytes_to_send;
+    count -= bytes_to_send;
+  }
 }
 /*!
     @brief  Fill the whole screen by drawing a 128x64 bitmap image.
@@ -1083,7 +1103,25 @@ void SSD1306_DrawFullImage(const uint8_t *ptr){
   int8_t target_address = SSD1306ADDR;
   uint16_t count = (WIDTH*HEIGHT/8);
 
-  i2c_send(I2C0, target_address, (uint8_t *)ptr, count);
+  uint16_t chunk_size = I2C_FIFO_MAX - 1;  // reserve 1 byte for control byte
+
+  while (count > 0) {
+    uint16_t bytes_to_send = (count > chunk_size) ? chunk_size : count;
+
+    // local transmission buffer (1 control byte + data bytes)
+    uint8_t txbuf[I2C_FIFO_MAX];
+    txbuf[0] = 0x40;  // -0x40 to indicate Data Byte
+
+    memcpy(&txbuf[1], ptr, bytes_to_send);
+
+    // send control byte + this chunk of data
+    i2c_send(I2C1, target_address, txbuf, bytes_to_send + 1);
+
+    // advance buffer pointer
+    ptr += bytes_to_send;
+    count -= bytes_to_send;
+
+  }
 
 //  for(i=0; i<WIDTH*HEIGHT/8; i++){
 //    datawrite(ptr[i]); //SPI version
@@ -1414,7 +1452,11 @@ void SSD1306_OutChar(char data){//int i;
     int8_t target_address = SSD1306ADDR;
     uint16_t count = 6;
 
-    i2c_send(I2C0, target_address, (uint8_t *)&ASCII[data - 0x20], count);
+    uint8_t buffer[count + 1];
+    buffer[0] = 0x40;
+    memcpy(&buffer[1], (uint8_t *)&ASCII[data - 0x20], count);
+
+    i2c_send(I2C1, target_address,buffer , count+1);
 //    for(i=0; i<5; i=i+1){
 //      datawrite(ASCII[data - 0x20][i]);//SPI version
 //    }
