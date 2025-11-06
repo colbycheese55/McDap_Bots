@@ -1,49 +1,51 @@
 #include "../inc/pwm.h"
 
-static inline void set_cc(const PWM_Handle *h, uint32_t cmp) {
-    DL_TimerG_setCaptureCompareValue(h->base, cmp, h->ccIndex);
+// --------------------------------------------------------
+//  Common helper
+// --------------------------------------------------------
+static uint32_t clamp_cc(uint32_t period, float duty) {
+    if (duty < 0.f) duty = 0.f;
+    if (duty > 1.f) duty = 1.f;
+    uint32_t cmp = (uint32_t)(period * duty + 0.5f);
+    if (cmp > period) cmp = period;
+    return cmp;
+}
+
+static inline void set_cc(PWM_Handle *h, uint32_t cmp) {
+    DL_TimerG_setCaptureCompareValue((GPTIMER_Regs*)h->peripheral,
+                                     cmp,
+                                     h->ccChannel);
 }
 
 void PWM_init(PWM_Handle *h,
-              GPTIMER_Regs *base,     // <-- correct type
-              uint8_t ccIndex,
+              void *peripheral,
+              uint8_t ccChannel,
               uint32_t clkHz,
               uint32_t pwmHz,
               float duty)
 {
     if (pwmHz == 0) pwmHz = 1;
-    if (duty < 0.0f) duty = 0.0f;
-    if (duty > 1.0f) duty = 1.0f;
 
-    h->base    = base;
-    h->ccIndex = ccIndex;
-    h->clkHz   = clkHz;
-    h->period  = clkHz / pwmHz;
-    h->duty    = duty;
+    h->peripheral = peripheral;
+    h->ccChannel  = ccChannel;
+    h->clkHz      = clkHz;
+    h->period     = clkHz / pwmHz;
+    h->duty       = duty;
 
-    DL_TimerG_setLoadValue(h->base, h->period);
-
-    uint32_t cmp = (uint32_t)((float)h->period * duty + 0.5f);
-    if (cmp > h->period) cmp = h->period;
-    set_cc(h, cmp);
+    DL_TimerG_setLoadValue((GPTIMER_Regs*)peripheral, h->period);
+    set_cc(h, clamp_cc(h->period, duty));
 }
 
-void PWM_setDuty(PWM_Handle *h, float duty)
-{
-    if (duty < 0.0f) duty = 0.0f;
-    if (duty > 1.0f) duty = 1.0f;
+void PWM_setDuty(PWM_Handle *h, float duty) {
     h->duty = duty;
-
-    uint32_t cmp = (uint32_t)((float)h->period * duty + 0.5f);
-    if (cmp > h->period) cmp = h->period;
-    set_cc(h, cmp);
+    set_cc(h, clamp_cc(h->period, duty));
 }
 
-void PWM_setFrequency(PWM_Handle *h, uint32_t pwmHz)
-{
+void PWM_setFrequency(PWM_Handle *h, uint32_t pwmHz) {
     if (pwmHz == 0) pwmHz = 1;
     h->period = h->clkHz / pwmHz;
-    DL_TimerG_setLoadValue(h->base, h->period);
+
+    DL_TimerG_setLoadValue((GPTIMER_Regs*)h->peripheral, h->period);
     PWM_setDuty(h, h->duty);
 }
 
