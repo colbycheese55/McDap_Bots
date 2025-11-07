@@ -3,6 +3,8 @@
 #include "ti_msp_dl_config.h"      // brings in PWM_0_INST etc. + __NOP
 #include "LowLevelDrivers/inc/pwm.h"
 
+#include "hardware_init.h"
+
 // -------- Select which timer instances and CC indices you want to use --------
 // Example 1: both channels on the SAME timer instance (your current config)
 #define PWM_A_BASE   PWM_0_INST
@@ -28,7 +30,8 @@ static void delay_ms(uint32_t ms)
 
 int main(void)
 {
-    SYSCFG_DL_init();  // pinmux + power + peripheral init (from SysConfig)
+    // SYSCFG_DL_init();  // pinmux + power + peripheral init (from SysConfig)
+    hardware_init();
 
     // Open two logical PWM channels using the generic driver
     PWM_Handle chA, chB;

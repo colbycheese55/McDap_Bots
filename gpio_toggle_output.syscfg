@@ -42,6 +42,9 @@ ADC121.adcMem2chansel                    = "DL_ADC12_INPUT_CHAN_1";
 ADC121.adcPin3Config.hideOutputInversion = scripting.forceWrite(false);
 ADC121.adcPin3Config.$name               = "ti_driverlib_gpio_GPIOPinGeneric12";
 ADC121.adcPin5Config.$name               = "ti_driverlib_gpio_GPIOPinGeneric13";
+ADC121.peripheral.adcPin3.$assign        = "PA24";
+ADC121.peripheral.adcPin5.$assign        = "PB24";
+ADC121.peripheral.adcPin1.$assign        = "PA26";
 ADC121.adcPin1Config.$name               = "ti_driverlib_gpio_GPIOPinGeneric14";
 
 const Board = scripting.addModule("/ti/driverlib/Board", {}, false);
@@ -174,9 +177,6 @@ UART1.rxPinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric11";
  * re-solve from scratch.
  */
 ADC121.peripheral.$suggestSolution         = "ADC0";
-ADC121.peripheral.adcPin3.$suggestSolution = "PA24";
-ADC121.peripheral.adcPin5.$suggestSolution = "PB24";
-ADC121.peripheral.adcPin1.$suggestSolution = "PA26";
 Board.peripheral.$suggestSolution          = "DEBUGSS";
 Board.peripheral.swclkPin.$suggestSolution = "PA20";
 Board.peripheral.swdioPin.$suggestSolution = "PA19";
