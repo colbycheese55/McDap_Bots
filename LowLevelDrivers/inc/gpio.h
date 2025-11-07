@@ -2,13 +2,14 @@
 #define GPIO_H
 
 #include <stdint.h>
+#include "ti_msp_dl_config.h"
 
 /**
  * @brief Generic GPIO port handle.
  *
  * Each platform defines what GPIO_Port actually is.
  */
-typedef struct GPIO_Port GPIO_Port;
+typedef GPIO_Regs GPIO_Port;
 
 
 /**

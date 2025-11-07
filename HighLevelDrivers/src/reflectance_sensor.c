@@ -1,6 +1,7 @@
 #include "../inc/reflectance_sensor.h"
+#include "LowLevelDrivers/inc/sleep.h"
 
-#define SLAVE_ADDRESS   0x00 // todo
+#define SLAVE_ADDRESS   0x20
 
 // command bytes
 #define INPUT_PORT_0    0x00
@@ -65,10 +66,10 @@ uint16_t refsen_read_values() {
     gpio_x_set_direction(OUTPUT);
 
     // wait a small delay then set pins to input
-    // TODO: wait
+    sleep_us(1000);
     gpio_x_set_direction(INPUT);
 
     // wait a small delay and read the input values
-    // TODO: wait
+    sleep_us(100); // calibrating this determines how far away white and black surfaces can be detected
     return gpio_x_read_inputs();
 }
