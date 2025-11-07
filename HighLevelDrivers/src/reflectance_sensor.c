@@ -50,11 +50,8 @@ uint16_t gpio_x_read_inputs() {
 
 
 //* ------------- REFLECTANCE SENSOR ------------------- */
-void refsen_init(I2C_Regs *i2c_instance, uint8_t scl_index, uint8_t sda_index) {
+void refsen_init(I2C_Regs *i2c_instance) {
     i2c = i2c_instance;
-    SCLIndex = scl_index;
-    SDAIndex = sda_index;
-    i2c_init(i2c, SCLIndex, SDAIndex);
 
     // set the output ports to always be high (when outputs)
     uint8_t buffer[3] = {OUTPUT_PORT_0, 0xFF, 0xFF};

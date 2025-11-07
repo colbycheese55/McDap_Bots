@@ -21,10 +21,8 @@
  * driver for operation. Call this before calling refsen_read_values().
  *
  * @param[in] i2c       Pointer to the I2C register overlay for the peripheral.
- * @param[in] SCLIndex  IOMUX pin index for the I2C SCL line (index into IOMUX->SECCFG.PINCM[]).
- * @param[in] SDAIndex  IOMUX pin index for the I2C SDA line (index into IOMUX->SECCFG.PINCM[]).
  */
-void refsen_init(I2C_Regs *i2c, uint8_t SCLIndex, uint8_t SDAIndex);
+void refsen_init(I2C_Regs *i2c);
 
 /**
  * @brief Read reflectance sensor values.
