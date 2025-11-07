@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include "ti_msp_dl_config.h"      // brings in PWM_0_INST etc. + __NOP
 #include "LowLevelDrivers/inc/pwm.h"
+#include "LowLevelDrivers/inc/i2c.h"
+#include "HighLevelDrivers/inc/reflectance_sensor.h"
 
 // -------- Select which timer instances and CC indices you want to use --------
 // Example 1: both channels on the SAME timer instance (your current config)
@@ -37,48 +39,53 @@ int main(void)
     const uint32_t pwmHz = 1000u;
 
     // Initialize both channels (can be same base or different bases)
-    PWM_init(&chA, PWM_A_BASE, PWM_A_CCIDX, TIMER_CLK_HZ, pwmHz, 0.60f); // 60%
-    PWM_init(&chB, PWM_B_BASE, PWM_B_CCIDX, TIMER_CLK_HZ, pwmHz, 0.30f); // 30%
+    // PWM_init(&chA, PWM_A_BASE, PWM_A_CCIDX, TIMER_CLK_HZ, pwmHz, 0.60f); // 60%
+    // PWM_init(&chB, PWM_B_BASE, PWM_B_CCIDX, TIMER_CLK_HZ, pwmHz, 0.30f); // 30%
 
-    // Start both underlying timers. (If both channels use the same base,
-    // starting twice is harmless.)
-    PWM_start(&chA);
-    PWM_start(&chB);
+    // // Start both underlying timers. (If both channels use the same base,
+    // // starting twice is harmless.)
+    // PWM_start(&chA);
+    // PWM_start(&chB);
 
-    // ===== Case 1: BOTH ON =====
-    // A = 60%, B = 30% (adjust to taste)
-    PWM_setDuty(&chA, 0.60f);
-    PWM_setDuty(&chB, 0.30f);
-    delay_ms(1500);
+    // // ===== Case 1: BOTH ON =====
+    // // A = 60%, B = 30% (adjust to taste)
+    // PWM_setDuty(&chA, 0.60f);
+    // PWM_setDuty(&chB, 0.30f);
+    // delay_ms(1500);
 
-    // ===== Case 2: ONLY A ON =====
-    // Park B by setting duty to 0% (steady level). A keeps PWM’ing.
-    PWM_setDuty(&chB, 0.0f);
-    PWM_setDuty(&chA, 0.70f);
-    delay_ms(1500);
+    // // ===== Case 2: ONLY A ON =====
+    // // Park B by setting duty to 0% (steady level). A keeps PWM’ing.
+    // PWM_setDuty(&chB, 0.0f);
+    // PWM_setDuty(&chA, 0.70f);
+    // delay_ms(1500);
 
-    // ===== Case 3: ONLY B ON =====
-    // Park A; run B.
-    PWM_setDuty(&chA, 0.0f);
-    PWM_setDuty(&chB, 0.80f);
-    delay_ms(1500);
+    // // ===== Case 3: ONLY B ON =====
+    // // Park A; run B.
+    // PWM_setDuty(&chA, 0.0f);
+    // PWM_setDuty(&chB, 0.80f);
+    // delay_ms(1500);
+
+    i2c_init(I2C_0_INST, 50, 51);
+    refsen_init(I2C_0_INST);
 
     // Loop through the 3 behaviors so you can observe easily
     while (1) {
         // both on
-        PWM_setDuty(&chA, 0.50f);
-        PWM_setDuty(&chB, 0.0f);
-        delay_ms(1000);
+        // PWM_setDuty(&chA, 0.50f);
+        // PWM_setDuty(&chB, 0.0f);
+        // delay_ms(1000);
 
-        // only A
-        PWM_setDuty(&chB, 0.0f);
-        PWM_setDuty(&chA, 0.70f);
-        delay_ms(1000);
+        // // only A
+        // PWM_setDuty(&chB, 0.0f);
+        // PWM_setDuty(&chA, 0.70f);
+        // delay_ms(1000);
 
-        // only B
-        PWM_setDuty(&chA, 0.0f);
-        PWM_setDuty(&chB, 0.80f);
-        delay_ms(1000);
+        // // only B
+        // PWM_setDuty(&chA, 0.0f);
+        // PWM_setDuty(&chB, 0.80f);
+        // delay_ms(1000);
+
+        volatile uint16_t sensor_values = refsen_read_values();
     }
 }
 
