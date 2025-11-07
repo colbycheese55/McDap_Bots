@@ -6,7 +6,7 @@
 #define BSP_H_
 
 #include <stdint.h>
-#include "clock.h"
+
 
 // Defines related to clocking system
 // Valid clock frequencies are 4 MHz, 32 MHz, 40 MHz, and 80 MHz
