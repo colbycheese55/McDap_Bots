@@ -1,4 +1,5 @@
 #include "LowLevelDrivers/inc/pwm.h"
+#include "OLED_Example.h"
 
 #define TIMER_CLOCK_HZ 32000000UL
 
@@ -15,6 +16,8 @@ int main(void)
     // Channel 1 = CCP1 -> PA0 (red LED on J4)
     PWM_init(&pwm, 1, TIMER_CLOCK_HZ, 1000, 0.5f);
     PWM_start(&pwm);
+
+    OLED_Example_App();
 
     while (1) {
         // Fade up
