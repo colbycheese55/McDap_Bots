@@ -41,3 +41,5 @@ float adc_get_voltage(ADC_Handle *adc, float vref);
 
 #endif //HAL_ADC_H
 
+
+#endif /* ADC_H_ */

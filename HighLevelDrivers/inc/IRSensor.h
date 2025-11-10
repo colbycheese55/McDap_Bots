@@ -1,3 +1,6 @@
+#ifndef IRSENSOR_H_
+#define IRSENSOR_H_
+
 #include "../../LowLevelDrivers/inc/adc.h"
 
 
@@ -14,5 +17,4 @@ void ir_init(ADC_Handle ir_left_handle, ADC_Handle ir_center_handle, ADC_Handle 
 uint8_t ir_get_distance(IR_Sensor_Position position);
 
 
-
-
+#endif /* IRSENSOR_H_ */
