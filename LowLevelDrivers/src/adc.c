@@ -41,11 +41,11 @@ float adc_get_voltage(ADC_Handle *adc, float vref) {
 // --------- ADC INTERRUPT HANDLER ---------
 void ADC12_0_INST_IRQHandler(void)
 {
-    switch (DL_ADC12_getPendingInterrupt(ADC12_0_INST)) {
-        case DL_ADC12_IIDX_MEM0_RESULT_LOADED:
-            adcDone = true;
-            break;
-        default:
-            break;
-    }
+    // switch (DL_ADC12_getPendingInterrupt(ADC12_0_INST)) {
+    //     case DL_ADC12_IIDX_MEM0_RESULT_LOADED:
+    //         adcDone = true;
+    //         break;
+    //     default:
+    //         break;
+    // }
 }
