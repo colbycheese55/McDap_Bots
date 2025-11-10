@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "ti_msp_dl_config.h"      // brings in PWM_0_INST etc. + __NOP
 #include "LowLevelDrivers/inc/pwm.h"
+#include "HighLevelDrivers/inc/motor.h"
 
 #include "hardware_init.h"
 
@@ -32,6 +33,9 @@ int main(void)
 {
     // SYSCFG_DL_init();  // pinmux + power + peripheral init (from SysConfig)
     hardware_init();
+
+    motor_set_speed_left(0.00f);
+    motor_set_speed_right(0.00f);
 
     // Open two logical PWM channels using the generic driver
     // PWM_Handle chA, chB;
@@ -99,7 +103,7 @@ int main(void)
     //     pwm_set_duty(DL_TIMER_CC_1_INDEX, load, (count % 100) / 100.0);
     //     count += 1;
     //     delay_ms(50);
-    }
+    // }
 }
 
 

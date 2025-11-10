@@ -6,6 +6,7 @@
 
 #include "HighLevelDrivers/inc/bumpSwitches.h"
 #include "HighLevelDrivers/inc/IRSensor.h"
+#include "HighLevelDrivers/inc/motor.h"
 // #include "HighLevelDrivers/SSD1306.h"
 
 
@@ -17,7 +18,7 @@ void hardware_init(void)
     SYSCFG_DL_init();
 
     // Initialize OLED controller
-    SSD1306_Init(SSD1306_SWITCHCAPVCC); // note: this function also initializes the I2C bus on PB2 and PB3
+    // SSD1306_Init(SSD1306_SWITCHCAPVCC); // note: this function also initializes the I2C bus on PB2 and PB3
     
 
     // bump switches
@@ -55,7 +56,37 @@ void hardware_init(void)
     ir_init(ir_left, ir_center, ir_right);
 
     // motors
-    // PWM TODO
+    PWM_Handle motor_left_m1;
+    PWM_Handle motor_left_m2;
+    PWM_Handle motor_right_m1;
+    PWM_Handle motor_right_m2;
+    uint32_t clkHz = 32000000; // MCU clock frequency
+    uint32_t pwmHz = 10000;
+    PWM_init(&motor_left_m1,
+             MOTOR_LEFT_RIGHT_M1_INST,
+             GPIO_MOTOR_LEFT_RIGHT_M1_C0_IDX,
+             clkHz,
+             pwmHz,
+             0.0f);
+    PWM_init(&motor_left_m2,
+             MOTOR_LEFT_M2_INST,
+             GPIO_MOTOR_LEFT_M2_C2_IDX,
+             clkHz,
+             pwmHz,
+             0.0f);
+    PWM_init(&motor_right_m1,
+             MOTOR_LEFT_RIGHT_M1_INST,
+             GPIO_MOTOR_LEFT_RIGHT_M1_C1_IDX,
+             clkHz,
+             pwmHz,
+             0.0f);
+    PWM_init(&motor_right_m2,
+             MOTOR_RIGHT_M2_INST,
+             GPIO_MOTOR_RIGHT_M2_C1_IDX,
+             clkHz,
+             pwmHz,
+             0.0f);
+
     GPIO_Handle motor_left_a = {
         .peripheral = MOTOR_ENCODERS_MOTOR_LEFT_A_PORT,
         .pin = MOTOR_ENCODERS_MOTOR_LEFT_A_PIN
@@ -72,4 +103,16 @@ void hardware_init(void)
         .peripheral = MOTOR_ENCODERS_MOTOR_RIGHT_B_PORT,
         .pin = MOTOR_ENCODERS_MOTOR_RIGHT_B_PIN
     };
+
+    Motor_Handle motors = {
+        .left_motor_forward = &motor_left_m1,
+        .left_motor_backward = &motor_left_m2,
+        .right_motor_forward = &motor_right_m1,
+        .right_motor_backward = &motor_right_m2,
+        .left_encoder_a = motor_left_a,
+        .left_encoder_b = motor_left_b,
+        .right_encoder_a = motor_right_a,
+        .right_encoder_b = motor_right_b
+    };
+    motor_init(&motors);
 }
