@@ -46,15 +46,18 @@ void hardware_init(void)
     // IR sensors
     ADC_Handle ir_left = {
         .adc12 = IR_SENSORS_INST,
-        .channel = IR_SENSORS_ADCMEM_0
+        .channel = IR_SENSORS_ADCMEM_0,
+        .mem_result_loaded = DL_ADC12_IIDX_MEM0_RESULT_LOADED
     };
     ADC_Handle ir_center = {
         .adc12 = IR_SENSORS_INST,
-        .channel = IR_SENSORS_ADCMEM_1
+        .channel = IR_SENSORS_ADCMEM_1,
+        .mem_result_loaded = DL_ADC12_IIDX_MEM1_RESULT_LOADED
     };
     ADC_Handle ir_right = {
         .adc12 = IR_SENSORS_INST,
-        .channel = IR_SENSORS_ADCMEM_2
+        .channel = IR_SENSORS_ADCMEM_2,
+        .mem_result_loaded = DL_ADC12_IIDX_MEM2_RESULT_LOADED
     };
     ir_init(ir_left, ir_center, ir_right);
 

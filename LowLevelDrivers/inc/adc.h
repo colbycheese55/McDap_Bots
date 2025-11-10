@@ -17,6 +17,7 @@ typedef struct {
 typedef struct {
 	ADC12_Regs* adc12;
 	DL_ADC12_MEM_IDX channel;
+	uint32_t mem_result_loaded;
 } ADC_Handle;
 
 #endif
