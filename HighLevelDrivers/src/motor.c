@@ -10,34 +10,34 @@ Motor_Handle motor;
 uint8_t quads_state_left[2] = {0, 0};
 uint8_t quads_state_right[2] = {0, 0};
 
-void motor_init(Motor_Handle* motor_handle) {
-    motor = *motor_handle;
+void motor_init(Motor_Handle motor_handle) {
+    motor = motor_handle;
 
-    PWM_start(motor.left_motor_forward);
-    PWM_start(motor.left_motor_backward);
-    // PWM_start(motor.right_motor_forward);
-    // PWM_start(motor.right_motor_backward);
+    PWM_start(&(motor.left_motor_forward));
+    PWM_start(&(motor.left_motor_backward));
+    PWM_start(&(motor.right_motor_forward));
+    PWM_start(&(motor.right_motor_backward));
 }
 
 void motor_set_speed_left(float speed) {
     if (speed >= 0) {
-        PWM_setDuty(motor.left_motor_forward, speed);
-        PWM_setDuty(motor.left_motor_backward, 0);
+        PWM_setDuty(&(motor.left_motor_forward), speed);
+        PWM_setDuty(&(motor.left_motor_backward), 0);
     } 
     else {
-        PWM_setDuty(motor.left_motor_forward, 0);
-        PWM_setDuty(motor.left_motor_backward, -speed);
+        PWM_setDuty(&(motor.left_motor_forward), 0);
+        PWM_setDuty(&(motor.left_motor_backward), -speed);
     }
 }
 
 void motor_set_speed_right(float speed) {
     if (speed >= 0) {
-        PWM_setDuty(motor.right_motor_forward, speed);
-        PWM_setDuty(motor.right_motor_backward, 0);
+        PWM_setDuty(&(motor.right_motor_forward), 0);
+        PWM_setDuty(&(motor.right_motor_backward), speed);
     } 
     else {
-        PWM_setDuty(motor.right_motor_forward, 0);
-        PWM_setDuty(motor.right_motor_backward, -speed);
+        PWM_setDuty(&(motor.right_motor_forward), -speed);
+        PWM_setDuty(&(motor.right_motor_backward), 0);
     }
 }
 
@@ -80,18 +80,6 @@ void drive_straight_distance(float distance, float speed) {
 }
 
 void turn_left(float angle, float speed) {
-    motor_set_speed_left(speed);
-    motor_set_speed_right(0);
-
-    float turn_circumference = 3.14159 * ROBOT_WIDTH * 2 * (angle / 360.0f);
-    float quads_needed = (turn_circumference / (3.14159 * WHEEL_DIAMETER)) * QUADS_PER_REV;
-    wait_on_quads_left((int)quads_needed);
-
-    motor_set_speed_left(0);
-    motor_set_speed_right(0);
-}
-
-void turn_right(float angle, float speed) {
     motor_set_speed_left(0);
     motor_set_speed_right(speed);
 
@@ -103,9 +91,21 @@ void turn_right(float angle, float speed) {
     motor_set_speed_right(0);
 }
 
-void turn_left_in_place(float angle, float speed) {
+void turn_right(float angle, float speed) {
     motor_set_speed_left(speed);
-    motor_set_speed_right(-speed);
+    motor_set_speed_right(0);
+
+    float turn_circumference = 3.14159 * ROBOT_WIDTH * 2 * (angle / 360.0f);
+    float quads_needed = (turn_circumference / (3.14159 * WHEEL_DIAMETER)) * QUADS_PER_REV;
+    wait_on_quads_left((int)quads_needed);
+
+    motor_set_speed_left(0);
+    motor_set_speed_right(0);
+}
+
+void turn_left_in_place(float angle, float speed) {
+    motor_set_speed_left(-speed);
+    motor_set_speed_right(speed);
 
     float turn_circumference = 3.14159 * ROBOT_WIDTH * (angle / 360.0f);
     float quads_needed = (turn_circumference / (3.14159 * WHEEL_DIAMETER)) * QUADS_PER_REV;
@@ -116,8 +116,8 @@ void turn_left_in_place(float angle, float speed) {
 }
 
 void turn_right_in_place(float angle, float speed) {
-    motor_set_speed_left(-speed);
-    motor_set_speed_right(speed);
+    motor_set_speed_left(speed);
+    motor_set_speed_right(-speed);
 
     float turn_circumference = 3.14159 * ROBOT_WIDTH * (angle / 360.0f);
     float quads_needed = (turn_circumference / (3.14159 * WHEEL_DIAMETER)) * QUADS_PER_REV;

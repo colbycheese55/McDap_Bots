@@ -19,10 +19,10 @@
  * the wheel encoders.
  */
 typedef struct {
-    PWM_Handle* left_motor_forward;
-    PWM_Handle* left_motor_backward;
-    PWM_Handle* right_motor_forward;
-    PWM_Handle* right_motor_backward;
+    PWM_Handle left_motor_forward;
+    PWM_Handle left_motor_backward;
+    PWM_Handle right_motor_forward;
+    PWM_Handle right_motor_backward;
 
     GPIO_Handle left_encoder_a;
     GPIO_Handle left_encoder_b;
@@ -34,11 +34,11 @@ typedef struct {
 /**
  * @brief Initialize motor subsystem and hardware handles.
  *
- * @param motor_handle Pointer to a Motor_Handle structure. The fields must be
+ * @param motor_handle A Motor_Handle structure. The fields must be
  *                     populated by the caller with valid PWM handles and GPIO
  *                     port/pin pairs before calling this function.
  */
-void motor_init(Motor_Handle* motor_handle);
+void motor_init(Motor_Handle motor_handle);
 
 /**
  * @brief Set the speed of the left motor.

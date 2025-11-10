@@ -105,14 +105,14 @@ void hardware_init(void)
     };
 
     Motor_Handle motors = {
-        .left_motor_forward = &motor_left_m1,
-        .left_motor_backward = &motor_left_m2,
-        .right_motor_forward = &motor_right_m1,
-        .right_motor_backward = &motor_right_m2,
+        .left_motor_forward = motor_left_m1,
+        .left_motor_backward = motor_left_m2,
+        .right_motor_forward = motor_right_m1,
+        .right_motor_backward = motor_right_m2,
         .left_encoder_a = motor_left_a,
         .left_encoder_b = motor_left_b,
         .right_encoder_a = motor_right_a,
         .right_encoder_b = motor_right_b
     };
-    motor_init(&motors);
+    motor_init(motors);
 }

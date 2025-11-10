@@ -35,8 +35,16 @@ int main(void)
     // SYSCFG_DL_init();  // pinmux + power + peripheral init (from SysConfig)
     hardware_init();
 
-    motor_set_speed_left(0.00f);
-    motor_set_speed_right(0.00f);
+    // motor_set_speed_left(-0.2f);
+    // motor_set_speed_right(-0.2f);
+
+    drive_straight_distance(500, 0.3);
+    turn_left(90, 0.1);
+    drive_straight_distance(2000, 1);
+    turn_right_in_place(180, 0.2);
+
+    motor_set_speed_left(0);
+    motor_set_speed_right(0);
 
     // OLED_Example_App();
     
