@@ -50,44 +50,13 @@ policies, either expressed or implied, of the FreeBSD Project.
 #include <stdlib.h>
 #include <string.h>
 #include "../inc/SSD1306.h"
-#include "../../LowLevelDrivers/inc/i2c.h"
+// #include "../../LowLevelDrivers/inc/i2c.h"
 
 #define I2C_FIFO_MAX   8
 // #include "../inc/CortexM.h"
 #define USEprintf 0
-// Tested for four possible hardware connections 
-// compile parameter I2C in SSD1306.h
-/*
- *  I2C0 Conncection | I2C1 Conncection | I2C2 Conncection | I2C3 Conncection
- *  ---------------- | ---------------- | ---------------- | ----------------
- *  SCL -------- PB2 | SCL -------- PA6 | SCL -------- PE4 | SCL -------- PD0
- *  SDA -------- PB3 | SDA -------- PA7 | SDA -------- PE5 | SDA -------- PD1
- */
-#if I2C == 0
-#include "../inc/I2CB1.h"
-#define I2C_Init I2C0_Init
-#define I2C_Send2 I2C0_Send2
-#define I2C_Send I2C0_Send
-#define I2C_SendData I2C0_SendData
-#elif I2C == 2
-#include "../inc/I2C2.h"
-#define I2C_Init I2C2_Init
-#define I2C_Send2 I2C2_Send2
-#define I2C_Send I2C2_Send
-#define I2C_SendData I2C2_SendData
-#elif I2C == 3
-#include "../inc/I2C3.h"
-#define I2C_Init I2C3_Init
-#define I2C_Send2 I2C3_Send2
-#define I2C_Send I2C3_Send
-#define I2C_SendData I2C3_SendData
-// #else
-// #include "../inc/I2C1.h"
-// #define I2C_Init I2C1_Init
-// #define I2C_Send2 I2C1_Send2
-// #define I2C_Send I2C1_Send
-// #define I2C_SendData I2C1_SendData
-#endif
+
+
  //
 // rough estimate of execution times (runs a little faster with 1.5k pullup from SDA to 3.3V, and no glitch)
 //                      with 1.5k   without
@@ -117,6 +86,8 @@ int vccstate;
 // vccstate = SSD1306_SWITCHCAPVCC for normal internal 3.3V power
 //            SSD1306_EXTERNALVCC for separate external power
 int rotation;
+I2C_Regs *i2c;
+
 // private function prototypes
 void ssd1306drawFastHLineInternal(int16_t x, int16_t y, int16_t w, uint16_t color);
 void ssd1306drawFastVLineInternal(int16_t x, int16_t y, int16_t h, uint16_t color);
@@ -441,7 +412,7 @@ void ssd1306command(uint8_t c) {
   uint16_t count = 2;
   uint8_t buffer[2] = {0, c};
 
-  i2c_send(I2C1, target_address, buffer, count);
+  i2c_send(i2c, target_address, buffer, count);
 }
 void ssd1306command1(uint8_t c) {
 //  commandwrite(c);
@@ -451,7 +422,7 @@ void ssd1306command1(uint8_t c) {
   uint16_t count = 2;
   uint8_t buffer[2] = {0, c};
 
-  i2c_send(I2C1, target_address, buffer, count);
+  i2c_send(i2c, target_address, buffer, count);
 
 }
 void ssd1306commandList(const uint8_t *c, uint32_t n) {
@@ -462,7 +433,7 @@ void ssd1306commandList(const uint8_t *c, uint32_t n) {
   buffer[0] = 0x00;
   memcpy(&buffer[1], c, n);
   uint16_t count = (uint16_t)n + 1;
-  i2c_send(I2C1, target_address, (uint8_t *)buffer, count);
+  i2c_send(i2c, target_address, (uint8_t *)buffer, count);
 //  while(n--) {
 //    commandwrite(*c);
 //    c++;
@@ -536,14 +507,11 @@ static const uint8_t init5[] = {
   SSD1306_DISPLAYON };                 // Main screen turn on
 // vccstate = SSD1306_SWITCHCAPVCC for normal internal 3.3V power
 //            SSD1306_EXTERNALVCC for separate external power
-int SSD1306_Init(int vccst) {
+int SSD1306_Init(I2C_Regs* i2cHandle, int vccst) {
 //  volatile uint32_t delay;
   // ClockDelay_1ms(300);
+  i2c = i2cHandle;
 
-  // I2C_Init(400,80000); // 100kHz
-  uint8_t sclIndex = 14; // referring to Delong's I2C code. Apparently the program uses 0-based indexing, so index 14 refers to index 15 on the datasheet for PIN Control Management Register indices
-  uint8_t sdaIndex = 15;
-  i2c_init(I2C1, sclIndex, sdaIndex);
   vccstate = vccst;
 //  RESET = 0;                            // reset the LCD to a known state, RESET low
 //  for(delay=0; delay<10; delay=delay+1);// delay minimum 100 ns
@@ -1072,7 +1040,7 @@ void SSD1306_OutBuffer(void) {
     memcpy(&txbuf[1], ptr, bytes_to_send);
 
     // send control byte + this chunk of data
-    i2c_send(I2C1, target_address, txbuf, bytes_to_send + 1);
+    i2c_send(i2c, target_address, txbuf, bytes_to_send + 1);
 
     // advance buffer pointer
     ptr += bytes_to_send;
@@ -1114,7 +1082,7 @@ void SSD1306_DrawFullImage(const uint8_t *ptr){
     memcpy(&txbuf[1], ptr, bytes_to_send);
 
     // send control byte + this chunk of data
-    i2c_send(I2C1, target_address, txbuf, bytes_to_send + 1);
+    i2c_send(i2c, target_address, txbuf, bytes_to_send + 1);
 
     // advance buffer pointer
     ptr += bytes_to_send;
@@ -1455,7 +1423,7 @@ void SSD1306_OutChar(char data){//int i;
     buffer[0] = 0x40;
     memcpy(&buffer[1], (uint8_t *)&ASCII[data - 0x20], count);
 
-    i2c_send(I2C1, target_address,buffer , count+1);
+    i2c_send(i2c, target_address,buffer , count+1);
 //    for(i=0; i<5; i=i+1){
 //      datawrite(ASCII[data - 0x20][i]);//SPI version
 //    }
