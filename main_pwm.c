@@ -47,7 +47,16 @@ int main(void)
     // // starting twice is harmless.)
     // PWM_start(&chA);
     // PWM_start(&chB);
+    // // Start both underlying timers. (If both channels use the same base,
+    // // starting twice is harmless.)
+    // PWM_start(&chA);
+    // PWM_start(&chB);
 
+    // // ===== Case 1: BOTH ON =====
+    // // A = 60%, B = 30% (adjust to taste)
+    // PWM_setDuty(&chA, 0.60f);
+    // PWM_setDuty(&chB, 0.30f);
+    // delay_ms(1500);
     // // ===== Case 1: BOTH ON =====
     // // A = 60%, B = 30% (adjust to taste)
     // PWM_setDuty(&chA, 0.60f);

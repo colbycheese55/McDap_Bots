@@ -51,7 +51,6 @@ policies, either expressed or implied, of the FreeBSD Project.
 #include <string.h>
 #include "../inc/SSD1306.h"
 #include "../../LowLevelDrivers/inc/i2c.h"
-#include "../../LowLevelDrivers/inc/clock.h"
 
 #define I2C_FIFO_MAX   8
 // #include "../inc/CortexM.h"
