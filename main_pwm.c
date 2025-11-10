@@ -3,6 +3,7 @@
 #include "ti_msp_dl_config.h"      // brings in PWM_0_INST etc. + __NOP
 #include "LowLevelDrivers/inc/pwm.h"
 #include "HighLevelDrivers/inc/motor.h"
+#include "OLED_Example.h"
 
 #include "hardware_init.h"
 
@@ -36,6 +37,9 @@ int main(void)
 
     motor_set_speed_left(0.00f);
     motor_set_speed_right(0.00f);
+
+    // OLED_Example_App();
+    
 
     // Open two logical PWM channels using the generic driver
     // PWM_Handle chA, chB;

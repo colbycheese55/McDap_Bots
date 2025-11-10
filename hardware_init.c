@@ -7,7 +7,7 @@
 #include "HighLevelDrivers/inc/bumpSwitches.h"
 #include "HighLevelDrivers/inc/IRSensor.h"
 #include "HighLevelDrivers/inc/motor.h"
-// #include "HighLevelDrivers/SSD1306.h"
+#include "HighLevelDrivers/inc/SSD1306.h"
 
 
 #include "ti_msp_dl_config.h"
@@ -18,7 +18,7 @@ void hardware_init(void)
     SYSCFG_DL_init();
 
     // Initialize OLED controller
-    // SSD1306_Init(SSD1306_SWITCHCAPVCC); // note: this function also initializes the I2C bus on PB2 and PB3
+    SSD1306_Init(I2C1, SSD1306_SWITCHCAPVCC);
     
 
     // bump switches
