@@ -14,11 +14,6 @@ typedef struct {
     UART_Regs *inst;   // bound to UART_1_INST
 } UART_Handle;
 
-/**
- * @brief Initialize/open the BLE UART (UART1) using the SysConfig settings.
- * Must be called once after SYSCFG_DL_init().
- */
-void UART_initBLE(void);
 
 /* Generic handle-based API (uses the same global UART1 instance) */
 void    UART_open(UART_Handle *h);                        // binds to UART1
@@ -28,13 +23,6 @@ void    UART_write(UART_Handle *h, const uint8_t *buf, uint32_t len);
 void    UART_flushRX(UART_Handle *h);
 void    UART_flushTX(UART_Handle *h);
 
-/* Convenience singleton accessor (returns the internal UART1 handle) */
-UART_Handle *UART_getBLEHandle(void);
-
-/* --- Compatibility symbols expected by AP.c --- */
-uint8_t UART1_InChar(void);
-void    UART1_OutChar(uint8_t c);
-void    UART1_Write(const uint8_t *buf, uint32_t len);
 
 #ifdef __cplusplus
 }

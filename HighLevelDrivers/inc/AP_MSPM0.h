@@ -1,74 +1,90 @@
-// #ifndef AP_H
-// #define AP_H
-// /**
-//  * @file      AP.h
-//  * @brief     BLE Application Processor transport for CC26xx SNP over UART (MSPM0)
-//  * @details   UART1 + MRDY/SRDY/RESET handshake transport and helpers.
-//  */
+#ifndef AP_H
+#define AP_H
+/**
+ * @file      AP.h
+ * @brief     BLE Application Processor transport for CC26xx SNP over UART (MSPM0)
+ * @details   UART1 + MRDY/SRDY/RESET handshake transport and helpers.
+ */
 
-// #include <stdint.h>
+#include <stdint.h>
+#include "../../LowLevelDrivers/inc/gpio.h"
+#include "../../LowLevelDrivers/inc/uart.h"
 
-// #ifdef __cplusplus
-// extern "C" {
-// #endif
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-// // ----------------- status codes -----------------
-// #define APOK    0
-// #define APFAIL  1
+typedef struct { 
+    UART_Handle* uart;
+    GPIO_Handle master_rdy;
+    GPIO_Handle slave_rdy;
+    GPIO_Handle reset;
+} AP_Handle;
 
-// // NPI framing constants
-// #define AP_SOF  0xFE
 
-// /**
-//  * @brief Check if the CC26xx is asserting SRDY (active-low).
-//  * @return non-zero if SRDY is asserted (ready), 0 if idle.
-//  */
-// uint32_t AP_RecvStatus(void);
+/**
+ * @brief Initialize the AP with given handles.
+ * @param ap_handle  pre-initialized AP_Handle structure
+ */
+void AP_init(AP_Handle ap_handle);
 
-// /**
-//  * @brief Receive one NPI frame from the CC26xx over UART1.
-//  * Performs MRDY/SRDY handshake; blocks with a software timeout.
-//  * @param pt  destination buffer (the SOF byte is stored first)
-//  * @param max max bytes to store (excess is discarded but counted)
-//  * @return APOK on success, APFAIL on timeout/format/FCS error
-//  */
-// int AP_RecvMessage(uint8_t *pt, uint32_t max);
+// ----------------- status codes -----------------
+#define APOK    0
+#define APFAIL  1
 
-// /**
-//  * @brief Send one NPI frame to the CC26xx over UART1.
-//  * Buffer must start at SOF (0xFE). This function computes and appends FCS.
-//  * @param msg pointer to SOF byte
-//  * @return APOK on success, APFAIL on timeout
-//  */
-// int AP_SendMessage(uint8_t *msg);
+// NPI framing constants
+#define AP_SOF  0xFE
 
-// /**
-//  * @brief Send a frame and wait for the response.
-//  * @param msgOut outgoing frame (starts at SOF)
-//  * @param msgIn  destination buffer for the received frame
-//  * @param maxIn  capacity of msgIn
-//  * @return APOK or APFAIL
-//  */
-// int AP_SendMessageResponse(uint8_t *msgOut, uint8_t *msgIn, uint32_t maxIn);
+/**
+ * @brief Check if the CC26xx is asserting SRDY (active-low).
+ * @return non-zero if SRDY is asserted (ready), 0 if idle.
+ */
+uint32_t AP_RecvStatus(void);
 
-// /**
-//  * @brief Pulse RESET low (~10 ms) with MRDY deasserted, then release.
-//  */
-// void AP_Reset(void);
+/**
+ * @brief Receive one NPI frame from the CC26xx over UART1.
+ * Performs MRDY/SRDY handshake; blocks with a software timeout.
+ * @param pt  destination buffer (the SOF byte is stored first)
+ * @param max max bytes to store (excess is discarded but counted)
+ * @return APOK on success, APFAIL on timeout/format/FCS error
+ */
+int AP_RecvMessage(uint8_t *pt, uint32_t max);
 
-// /**
-//  * @brief Busy-wait approximate millisecond delay.
-//  */
-// void AP_Delay1ms(uint32_t n);
+/**
+ * @brief Send one NPI frame to the CC26xx over UART1.
+ * Buffer must start at SOF (0xFE). This function computes and appends FCS.
+ * @param msg pointer to SOF byte
+ * @return APOK on success, APFAIL on timeout
+ */
+int AP_SendMessage(uint8_t *msg);
 
-// // --------- optional debug counters ----------
-// extern volatile uint32_t TimeOutErr;
-// extern volatile uint32_t NoSOFErr;
-// extern volatile uint32_t fcserr;
-// extern volatile uint32_t RecvCount;
+/**
+ * @brief Send a frame and wait for the response.
+ * @param msgOut outgoing frame (starts at SOF)
+ * @param msgIn  destination buffer for the received frame
+ * @param maxIn  capacity of msgIn
+ * @return APOK or APFAIL
+ */
+int AP_SendMessageResponse(uint8_t *msgOut, uint8_t *msgIn, uint32_t maxIn);
 
-// #ifdef __cplusplus
-// }
-// #endif
+/**
+ * @brief Pulse RESET low (~10 ms) with MRDY deasserted, then release.
+ */
+void AP_Reset(void);
 
-// #endif // AP_H
+/**
+ * @brief Busy-wait approximate millisecond delay.
+ */
+void AP_Delay1ms(uint32_t n);
+
+// --------- optional debug counters ----------
+extern volatile uint32_t TimeOutErr;
+extern volatile uint32_t NoSOFErr;
+extern volatile uint32_t fcserr;
+extern volatile uint32_t RecvCount;
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // AP_H
