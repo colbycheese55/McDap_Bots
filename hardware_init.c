@@ -8,6 +8,7 @@
 #include "HighLevelDrivers/inc/IRSensor.h"
 #include "HighLevelDrivers/inc/motor.h"
 #include "HighLevelDrivers/inc/SSD1306.h"
+#include "HighLevelDrivers/inc/reflectance_sensor.h"
 
 
 #include "ti_msp_dl_config.h"
@@ -17,8 +18,9 @@ void hardware_init(void)
 {
     SYSCFG_DL_init();
 
-    // Initialize OLED controller
+    // Initialize I2C devices (OLED screen controller and reflectance sensor's GPIO expander)
     SSD1306_Init(I2C1, SSD1306_SWITCHCAPVCC);
+    refsen_init(I2C1);
     
 
     // bump switches
@@ -40,6 +42,7 @@ void hardware_init(void)
     };
     bump_switches_init(bump_far_left, bump_mid_left, bump_mid_right, bump_far_right);
 
+
     // IR sensors
     ADC_Handle ir_left = {
         .adc12 = IR_SENSORS_INST,
@@ -55,6 +58,7 @@ void hardware_init(void)
     };
     ir_init(ir_left, ir_center, ir_right);
 
+    
     // motors
     PWM_Handle motor_left_m1;
     PWM_Handle motor_left_m2;
