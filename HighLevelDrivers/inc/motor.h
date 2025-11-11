@@ -57,6 +57,19 @@ void motor_set_speed_left(float speed);
 void motor_set_speed_right(float speed);
 
 /**
+ * @brief Drive in an arc while moving.
+ *
+ * Drives the robot in an arc defined by the translational and angular
+ * speeds. Positive angular speed indicates a left turn, negative
+ * indicates a right turn.
+ *
+ * @param translational_speed Speed in the range [-1.0, 1.0]. Direction is
+ *                             implied by the sign; positive moves forward.
+ * @param angular_speed         Angular speed in the range [-1.0, 1.0].
+ */
+void drive_arc(float translational_speed, float angular_speed);
+
+/**
  * @brief Drive straight for a given distance (blocking).
  *
  * Drives the robot forward (or backward if speed negative) until the

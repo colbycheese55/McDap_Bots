@@ -10,38 +10,8 @@ Motor_Handle motor;
 uint8_t quads_state_left[2] = {0, 0};
 uint8_t quads_state_right[2] = {0, 0};
 
-void motor_init(Motor_Handle motor_handle) {
-    motor = motor_handle;
+// <------- PRIVATE HELPER FUNCTIONS ------->
 
-    PWM_start(&(motor.left_motor_forward));
-    PWM_start(&(motor.left_motor_backward));
-    PWM_start(&(motor.right_motor_forward));
-    PWM_start(&(motor.right_motor_backward));
-}
-
-void motor_set_speed_left(float speed) {
-    if (speed >= 0) {
-        PWM_setDuty(&(motor.left_motor_forward), speed);
-        PWM_setDuty(&(motor.left_motor_backward), 0);
-    } 
-    else {
-        PWM_setDuty(&(motor.left_motor_forward), 0);
-        PWM_setDuty(&(motor.left_motor_backward), -speed);
-    }
-}
-
-void motor_set_speed_right(float speed) {
-    if (speed >= 0) {
-        PWM_setDuty(&(motor.right_motor_forward), 0);
-        PWM_setDuty(&(motor.right_motor_backward), speed);
-    } 
-    else {
-        PWM_setDuty(&(motor.right_motor_forward), -speed);
-        PWM_setDuty(&(motor.right_motor_backward), 0);
-    }
-}
-
-// helper function
 void wait_on_quads_left(uint32_t quads) {
     uint32_t count = 0;
     while (count < quads) {
@@ -66,6 +36,61 @@ void wait_on_quads_right(uint32_t quads) {
             count++;
         }
     }
+}
+
+float clamp(float value) {
+    if (value > 1.0f) {
+        return 1.0f;
+    } 
+    else if (value < -1.0f) {
+        return -1.0f;
+    } 
+    else {
+        return value;
+    }
+}
+
+// <------- PUBLIC FUNCTIONS ------->
+
+void motor_init(Motor_Handle motor_handle) {
+    motor = motor_handle;
+
+    PWM_start(&(motor.left_motor_forward));
+    PWM_start(&(motor.left_motor_backward));
+    PWM_start(&(motor.right_motor_forward));
+    PWM_start(&(motor.right_motor_backward));
+}
+
+void motor_set_speed_left(float speed) {
+    speed = clamp(speed);
+    if (speed >= 0) {
+        PWM_setDuty(&(motor.left_motor_forward), speed);
+        PWM_setDuty(&(motor.left_motor_backward), 0);
+    } 
+    else {
+        PWM_setDuty(&(motor.left_motor_forward), 0);
+        PWM_setDuty(&(motor.left_motor_backward), -speed);
+    }
+}
+
+void motor_set_speed_right(float speed) {
+    speed = clamp(speed);
+    if (speed >= 0) {
+        PWM_setDuty(&(motor.right_motor_forward), 0);
+        PWM_setDuty(&(motor.right_motor_backward), speed);
+    } 
+    else {
+        PWM_setDuty(&(motor.right_motor_forward), -speed);
+        PWM_setDuty(&(motor.right_motor_backward), 0);
+    }
+}
+
+void drive_arc(float translational_speed, float angular_speed) {
+    float left_speed = translational_speed - angular_speed;
+    float right_speed = translational_speed + angular_speed;
+
+    motor_set_speed_left(left_speed);
+    motor_set_speed_right(right_speed);
 }
 
 void drive_straight_distance(float distance, float speed) {
