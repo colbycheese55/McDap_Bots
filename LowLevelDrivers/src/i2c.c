@@ -5,6 +5,7 @@ uint32_t I2C_error;
 
 // This initialization code is based on the example from the MSPM0 academy
 // I2C Introduction lab.
+// Note: this function doesn't need to be called if the I2C interface is initialized using the syscfg filee
 void i2c_init(I2C_Regs *i2c, uint8_t SCLIndex, uint8_t SDAIndex)
 {
     uint32_t Mask;

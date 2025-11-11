@@ -17,6 +17,7 @@ typedef struct {
 typedef struct {
 	ADC12_Regs* adc12;
 	DL_ADC12_MEM_IDX channel;
+	uint32_t mem_result_loaded;
 } ADC_Handle;
 
 #endif
@@ -40,4 +41,3 @@ float adc_get_value(ADC_Handle *adc);
 float adc_get_voltage(ADC_Handle *adc, float vref);
 
 #endif //HAL_ADC_H
-

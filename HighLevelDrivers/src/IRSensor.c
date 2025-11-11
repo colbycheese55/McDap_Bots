@@ -11,6 +11,16 @@
 
 #define FUDGE_FACTOR 5.3 // experimentally determined to match actual distances
 
+ADC_Handle ir_left;
+ADC_Handle ir_center;
+ADC_Handle ir_right;
+
+void ir_init(ADC_Handle ir_left_handle, ADC_Handle ir_center_handle, ADC_Handle ir_right_handle) {
+    ir_left = ir_left_handle;
+    ir_center = ir_center_handle;
+    ir_right = ir_right_handle;
+}
+
 
 uint32_t ConvertDistanceSensorReading(uint32_t SensorInput)
 {
@@ -32,7 +42,20 @@ uint32_t ConvertDistanceSensorReading(uint32_t SensorInput)
     return (uint32_t) ReturnValue;
 }
 
-uint8_t get_IR_distance(ADC_Handle *adc) {
+uint8_t ir_get_distance(IR_Sensor_Position position) {
+    ADC_Handle *adc;
+    switch (position) {
+        case LEFT:
+            adc = &ir_left;
+            break;
+        case CENTER:
+            adc = &ir_center;
+            break;
+        case RIGHT:
+            adc = &ir_right;
+            break;
+    }
+    
     float percent = adc_get_value(adc);
     uint32_t reading = (uint32_t)(percent * 4095.0f); // convert back to a 12-bit reading
     uint32_t distance = ConvertDistanceSensorReading(reading);

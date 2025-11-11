@@ -1,6 +1,10 @@
 #include "../inc/adc.h"
 
+
 volatile bool adcDone = false; // ADC conversion completion flag
+
+volatile ADC12_Regs* adc_inst;
+volatile uint32_t mem_result_loaded;
 
 void adc_start_conversion(ADC_Handle *adc) {
 	ADC12_Regs *adc12 = adc->adc12;
@@ -22,6 +26,9 @@ void adc_enable_conversions(ADC_Handle *adc) {
 }
 
 float adc_get_value(ADC_Handle *adc) {
+    adc_inst = adc->adc12;
+    mem_result_loaded = adc->mem_result_loaded;
+
     adc_start_conversion(adc);
     while (!adcDone) {
         __WFE();
@@ -41,11 +48,7 @@ float adc_get_voltage(ADC_Handle *adc, float vref) {
 // --------- ADC INTERRUPT HANDLER ---------
 void ADC12_0_INST_IRQHandler(void)
 {
-    switch (DL_ADC12_getPendingInterrupt(ADC12_0_INST)) {
-        case DL_ADC12_IIDX_MEM0_RESULT_LOADED:
-            adcDone = true;
-            break;
-        default:
-            break;
+    if (DL_ADC12_getPendingInterrupt(adc_inst) == mem_result_loaded) {
+        adcDone = true;
     }
 }

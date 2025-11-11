@@ -99,6 +99,7 @@ policies, either expressed or implied, of the FreeBSD Project.
 #ifndef _SSD1306_H_
 #define _SSD1306_H_
 #include <stdint.h>
+#include "../../LowLevelDrivers/inc/i2c.h"
 // Tested for four possible hardware connections I2C=0 I2C=1 I2C=2 and I2C=3
 #define I2C 1
 /*
@@ -129,11 +130,12 @@ policies, either expressed or implied, of the FreeBSD Project.
 // 63,0                   63,127
 /**
  * Initialize OLED
+ * @param i2cHandle  I2C interface handler (either I2C0 or I2C1)
  * @param vccst Vcc voltage parameter, uSSD1306_EXTERNALVCC or SSD1306_SWITCHCAPVCC
  * @return success or failure
  * @note for ECE319K and ECE445L use vccst=SSD1306_SWITCHCAPVCC
  */
-int  SSD1306_Init(int vccst);
+int  SSD1306_Init(I2C_Regs* i2cHandle, int vccst);
 
 /**
  * Copy all of RAM image to OLED. Use this command with SSD1306_ClearBuffer, and all Draw functions
