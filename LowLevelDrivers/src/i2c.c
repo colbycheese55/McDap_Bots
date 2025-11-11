@@ -1,4 +1,5 @@
 #include "../inc/i2c.h"
+#include "../inc/sleep.h"
 
 uint32_t I2C_error;
 
@@ -17,7 +18,8 @@ void i2c_init(I2C_Regs *i2c, uint8_t SCLIndex, uint8_t SDAIndex)
     Mask |= I2C_PWREN_ENABLE_ENABLE;
     i2c->GPRCM.PWREN = Mask;
 
-    ClockDelay(POWER_STARTUP_DELAY); // time for i2c to power up
+    // ClockDelay(POWER_STARTUP_DELAY); // time for i2c to power up
+    sleep_ms(POWER_STARTUP_DELAY);
 
     // Configure port pins for alternate i2c function
     Mask = IOMUX_PINCM_PC_CONNECTED;    // peripheral connected.

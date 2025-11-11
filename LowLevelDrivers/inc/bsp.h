@@ -6,7 +6,7 @@
 #define BSP_H_
 
 #include <stdint.h>
-#include "clock.h"
+
 
 // Defines related to clocking system
 // Valid clock frequencies are 4 MHz, 32 MHz, 40 MHz, and 80 MHz
@@ -22,7 +22,7 @@
 
 // Number of clock cycles to wait during power-up
 // Note that the project, empty_non_sysconfig uses a value of 16
-#define POWER_STARTUP_DELAY 24 // Valvano, page 74
+// #define POWER_STARTUP_DELAY 24 // Valvano, page 74
 
 // Indices for the Pin Control Management (PINCM) Registers
 // See Table 6-1 of the MSPM0350x datasheet
