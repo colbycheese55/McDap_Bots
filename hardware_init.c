@@ -9,6 +9,7 @@
 #include "HighLevelDrivers/inc/motor.h"
 #include "HighLevelDrivers/inc/SSD1306.h"
 #include "HighLevelDrivers/inc/reflectance_sensor.h"
+#include "HighLevelDrivers/inc/AP_MSPM0.h"
 
 
 #include "ti_msp_dl_config.h"
@@ -119,4 +120,30 @@ void hardware_init(void)
         .right_encoder_b = motor_right_b
     };
     motor_init(motors);
+
+
+    // bluetooth
+    UART_Handle uart_bluetooth = {
+        .inst = BLUETOOTH_INST
+    };
+    GPIO_Handle master_rdy = {
+        .peripheral = BLUETOOTH_GPIO_MASTER_RDY_PORT,
+        .pin = BLUETOOTH_GPIO_MASTER_RDY_PIN
+    };
+    GPIO_Handle slave_rdy = {
+        .peripheral = BLUETOOTH_GPIO_SLAVE_RDY_PORT,
+        .pin = BLUETOOTH_GPIO_SLAVE_RDY_PIN
+    };
+    GPIO_Handle reset = {
+        .peripheral = BLUETOOTH_GPIO_RESET_PORT,
+        .pin = BLUETOOTH_GPIO_RESET_PIN
+    };
+
+    AP_Handle bluetooth = {
+        .uart = &uart_bluetooth,
+        .master_rdy = master_rdy,
+        .slave_rdy = slave_rdy,
+        .reset = reset
+    };
+    AP_init(bluetooth);
 }
