@@ -1,4 +1,6 @@
 .settings/
+.vscode/
+*.theia-workspace
 Debug/
 targetConfigs/
 .ccsproject
