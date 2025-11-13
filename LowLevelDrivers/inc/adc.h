@@ -22,8 +22,6 @@ typedef struct {
 
 #endif
 
-void init_adc(ADC_Handle* adc, size_t adc_ptr, uint32_t channel);
-
 // read the ADC for the current analog value, returns a float between 0.0 and 1.0
 float adc_get_value(ADC_Handle *adc);
 

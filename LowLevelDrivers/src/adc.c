@@ -48,7 +48,6 @@ float adc_get_voltage(ADC_Handle *adc, float vref) {
 }
 
 
-
 // --------- ADC INTERRUPT HANDLER ---------
 void ADC12_0_INST_IRQHandler(void)
 {
