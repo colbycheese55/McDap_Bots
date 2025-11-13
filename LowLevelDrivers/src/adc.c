@@ -6,12 +6,13 @@ volatile bool adcDone = false; // ADC conversion completion flag
 volatile ADC12_Regs* adc_inst;
 volatile uint32_t mem_result_loaded;
 
-void adc_start_conversion(ADC_Handle *adc) {
+//--------- ADC HELPER FUNCTIONS---------
+static void adc_start_conversion(ADC_Handle *adc) {
 	ADC12_Regs *adc12 = adc->adc12;
     adc12->ULLMEM.CTL1 |= (ADC12_CTL1_SC_START);
 }
 
-uint16_t adc_get_memory_result(ADC_Handle *adc) {
+static uint16_t adc_get_memory_result(ADC_Handle *adc) {
 	ADC12_Regs *adc12 = adc->adc12;
 	DL_ADC12_MEM_IDX idx =  adc->channel;
 
@@ -20,10 +21,12 @@ uint16_t adc_get_memory_result(ADC_Handle *adc) {
     return (uint16_t)(*(pReg + DL_ADC12_SVT_OFFSET));
 }
 
-void adc_enable_conversions(ADC_Handle *adc) {
+static void adc_enable_conversions(ADC_Handle *adc) {
 	ADC12_Regs *adc12 = adc->adc12;
     adc12->ULLMEM.CTL0 |= (ADC12_CTL0_ENC_ON);
 }
+
+//-----------------------------------------------
 
 float adc_get_value(ADC_Handle *adc) {
     adc_inst = adc->adc12;
