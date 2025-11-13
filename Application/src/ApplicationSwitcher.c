@@ -3,6 +3,7 @@
 #include "../inc/ApplicationSwitcher.h"
 #include "../../HighLevelDrivers/inc/motor.h"
 #include "../../LowLevelDrivers/inc/sleep.h"
+#include "../inc/maze_bump.h"
 
 #define INACTIVE        0
 #define FOLLOW_LINE     1
@@ -46,7 +47,7 @@ void run_application_switcher() {
                 // TODO: call maze IR application
                 break;
             case MAZE_BUMP:
-                // TODO: call maze bump application
+                run_maze_bump();
                 break;
         }
 
