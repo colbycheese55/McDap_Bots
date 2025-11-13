@@ -6,8 +6,10 @@ uint32_t I2C_error;
 // This initialization code is based on the example from the MSPM0 academy
 // I2C Introduction lab.
 // Note: this function doesn't need to be called if the I2C interface is initialized using the syscfg filee
-void i2c_init(I2C_Regs *i2c, uint8_t SCLIndex, uint8_t SDAIndex)
+void i2c_init(I2C_Handle *i2cHandle, uint8_t SCLIndex, uint8_t SDAIndex)
 {
+    I2C_Regs *i2c = i2cHandle->inst;
+
     uint32_t Mask;
 
     Mask = I2C_RSTCTL_KEY_UNLOCK_W;
@@ -102,8 +104,9 @@ uint16_t static I2CFillTXFIFO(I2C_Regs *i2c, uint8_t *buffer, uint16_t count)
     return FIFONotFull;
 }
 
-uint16_t i2c_send(I2C_Regs *i2c, uint8_t target_address, uint8_t *buffer, uint16_t count)
+uint16_t i2c_send(I2C_Handle *i2cHandle, uint8_t target_address, uint8_t *buffer, uint16_t count)
 {
+    I2C_Regs *i2c = i2cHandle->inst;    
     uint16_t ReturnValue = TRUE;
     uint32_t Mask;
     uint32_t Value;
@@ -147,8 +150,9 @@ uint16_t i2c_send(I2C_Regs *i2c, uint8_t target_address, uint8_t *buffer, uint16
     return ReturnValue;
 }
 
-void i2c_receive(I2C_Regs *i2c, uint8_t target_address, uint8_t *buffer, uint16_t count)
+void i2c_receive(I2C_Handle *i2cHandle, uint8_t target_address, uint8_t *buffer, uint16_t count)
 {
+    I2C_Regs *i2c = i2cHandle->inst;
     uint32_t Mask;
     uint32_t Value;
 

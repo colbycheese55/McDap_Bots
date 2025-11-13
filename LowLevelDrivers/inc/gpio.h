@@ -7,7 +7,7 @@
 #ifdef STM32G071xx
 #include "stm32g0xx_hal.h"
 
-#else
+#elif __MSPM0G3507__
 #include <ti/devices/msp/msp.h>
 #include <ti/driverlib/dl_common.h>
 #endif

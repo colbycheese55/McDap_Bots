@@ -1,4 +1,6 @@
 #include "i2c.h"
+#define FALSE 0
+#define TRUE 1
 
 
 /**
@@ -9,9 +11,18 @@
  * @param buffer Buffer containing the data to be sent
  * @param count Number of bytes of data to be sent
  */
-void i2c_send(I2C_HandleTypeDef *hi2c, uint8_t target_address, uint8_t *buffer, uint16_t count) {
+uint16_t i2c_send(I2C_Handle *i2cHandle, uint8_t target_address, uint8_t *buffer, uint16_t count) {
+	I2C_HandleTypeDef* hi2c = i2cHandle->inst;
 	uint16_t device_address = target_address << 1;
-	HAL_I2C_Master_Transmit(hi2c, device_address, buffer, count, 1000); // use timeout of 1000 ms
+	HAL_StatusTypeDef status;
+
+	status = HAL_I2C_Master_Transmit(hi2c, device_address, buffer, count, 1000);
+	if (status == HAL_OK) {
+		return TRUE;
+	}
+	else if (status == HAL_BUSY) {
+		return FALSE;
+	}
 }
 
 /**
@@ -22,7 +33,8 @@ void i2c_send(I2C_HandleTypeDef *hi2c, uint8_t target_address, uint8_t *buffer, 
  * @param buffer Buffer storing the data to be received
  * @param count Number of bytes of data to be received
  */
-void i2c_receive(I2C_HandleTypeDef* hi2c, uint8_t target_address, uint8_t *buffer, uint16_t count) {
+void i2c_receive(I2C_Handle *i2cHandle, uint8_t target_address, uint8_t *buffer, uint16_t count) {
+	I2C_HandleTypeDef* hi2c = i2cHandle->inst;
 	uint16_t device_address = target_address << 1;
 	HAL_I2C_Master_Receive(hi2c, device_address, buffer, count, 1000); // use timeout of 1000 ms
 }

@@ -19,8 +19,11 @@ void hardware_init(void)
     SYSCFG_DL_init();
 
     // Initialize I2C devices (OLED screen controller and reflectance sensor's GPIO expander)
-    SSD1306_Init(I2C1, SSD1306_SWITCHCAPVCC);
-    refsen_init(I2C1);
+    I2C_Handle i2c = {
+        .inst = I2C1
+    };
+    SSD1306_Init(&i2c, SSD1306_SWITCHCAPVCC);
+    refsen_init(&i2c);
     
 
     // bump switches

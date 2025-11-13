@@ -5,7 +5,7 @@
 
 #ifdef STM32G071xx
     #include "stm32g0xx_hal.h"
-#else
+#elif __MSPM0G3507__
     #include "ti_msp_dl_config.h"        // brings in msp.h + dl_core.h
     #include <ti/driverlib/dl_timer.h>   // DL_TimerG_* APIs + GPTIMER_Regs
 #endif //STM32G071xx

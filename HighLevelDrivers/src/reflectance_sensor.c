@@ -1,5 +1,5 @@
 #include "../inc/reflectance_sensor.h"
-#include "LowLevelDrivers/inc/sleep.h"
+#include "../../LowLevelDrivers/inc/sleep.h"
 
 #define SLAVE_ADDRESS   0x20
 
@@ -16,7 +16,7 @@ typedef enum {
     OUTPUT
 } GPIO_Direction;
 
-I2C_Regs *i2c;
+static I2C_Handle *i2c;
 uint8_t SCLIndex = 0;
 uint8_t SDAIndex = 0;
 
@@ -50,12 +50,11 @@ uint16_t gpio_x_read_inputs() {
 
 
 //* ------------- REFLECTANCE SENSOR ------------------- */
-void refsen_init(I2C_Regs *i2c_instance) {
-    i2c = i2c_instance;
-
+void refsen_init(I2C_Handle *i2cHandle) {
+    i2c = i2cHandle;
     // set the output ports to always be high (when outputs)
     uint8_t buffer[3] = {OUTPUT_PORT_0, 0xFF, 0xFF};
-    i2c_send(i2c, SLAVE_ADDRESS, buffer, 3);
+    i2c_send(i2cHandle, SLAVE_ADDRESS, buffer, 3);
 }
 
 uint16_t refsen_read_values() {

@@ -11,7 +11,7 @@ typedef struct {
 	ADC_HandleTypeDef* hadc; //should already contain channel information
 } ADC_Handle;
 
-#else
+#elif __MSPM0G3507__
 #include "ti_msp_dl_config.h"
 
 typedef struct {

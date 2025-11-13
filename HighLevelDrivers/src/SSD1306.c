@@ -86,7 +86,7 @@ int vccstate;
 // vccstate = SSD1306_SWITCHCAPVCC for normal internal 3.3V power
 //            SSD1306_EXTERNALVCC for separate external power
 int rotation;
-I2C_Regs *i2c;
+static I2C_Handle *i2c;
 
 // private function prototypes
 void ssd1306drawFastHLineInternal(int16_t x, int16_t y, int16_t w, uint16_t color);
@@ -507,7 +507,7 @@ static const uint8_t init5[] = {
   SSD1306_DISPLAYON };                 // Main screen turn on
 // vccstate = SSD1306_SWITCHCAPVCC for normal internal 3.3V power
 //            SSD1306_EXTERNALVCC for separate external power
-int SSD1306_Init(I2C_Regs* i2cHandle, int vccst) {
+int SSD1306_Init(I2C_Handle* i2cHandle, int vccst) {
 //  volatile uint32_t delay;
   // ClockDelay_1ms(300);
   i2c = i2cHandle;
