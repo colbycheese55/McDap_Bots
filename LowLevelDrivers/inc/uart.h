@@ -10,9 +10,19 @@
 extern "C" {
 #endif
 
+#ifdef STM32G071xx
+
+typedef struct {
+    UART_HandleTypeDef *inst;   // bound to UART_1_INST
+} UART_Handle;
+
+#else
+
 typedef struct {
     UART_Regs *inst;   // bound to UART_1_INST
 } UART_Handle;
+
+#endif //STM32G071xx
 
 /**
  * @brief Initialize/open the BLE UART (UART1) using the SysConfig settings.
