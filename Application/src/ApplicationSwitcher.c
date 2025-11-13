@@ -4,6 +4,8 @@
 #include "../../HighLevelDrivers/inc/motor.h"
 #include "../../LowLevelDrivers/inc/sleep.h"
 
+#include "../inc/LineFollow.h"
+
 #define INACTIVE        0
 #define FOLLOW_LINE     1
 #define RC              2
@@ -37,7 +39,7 @@ void run_application_switcher() {
                 }
                 break;
             case FOLLOW_LINE:
-                // TODO: call line following application
+                line_follow_run();
                 break;
             case RC:
                 // TODO: call bluetooth remote control application
