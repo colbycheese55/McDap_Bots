@@ -3,20 +3,21 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "ti_msp_dl_config.h"
-#include <ti/driverlib/dl_uart_main.h>
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #ifdef STM32G071xx
-
+#include "stm32g0xx_hal.h"
 typedef struct {
     UART_HandleTypeDef *inst;   // bound to UART_1_INST
 } UART_Handle;
 
 #else
+#include "ti_msp_dl_config.h"
+#include <ti/driverlib/dl_uart_main.h>
 
 typedef struct {
     UART_Regs *inst;   // bound to UART_1_INST
