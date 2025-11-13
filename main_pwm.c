@@ -4,6 +4,7 @@
 #include "LowLevelDrivers/inc/pwm.h"
 #include "HighLevelDrivers/inc/motor.h"
 #include "OLED_Example.h"
+#include "Application/inc/maze_bump.h"
 
 #include "hardware_init.h"
 
@@ -35,14 +36,10 @@ int main(void)
     // SYSCFG_DL_init();  // pinmux + power + peripheral init (from SysConfig)
     hardware_init();
 
-    // motor_set_speed_left(-0.2f);
-    // motor_set_speed_right(-0.2f);
+    // Run only the maze-bump roaming behavior from main
+    run_maze_bump();
 
-    drive_straight_distance(500, 0.3);
-    turn_left(90, 0.1);
-    drive_straight_distance(2000, 1);
-    turn_right_in_place(180, 0.2);
-
+    // Ensure motors are stopped if the routine returns
     motor_set_speed_left(0);
     motor_set_speed_right(0);
 

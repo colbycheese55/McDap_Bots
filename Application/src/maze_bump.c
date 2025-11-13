@@ -9,15 +9,15 @@
 #include "../../LowLevelDrivers/inc/sleep.h"
 
 // Tunable parameters
-#define FORWARD_SPEED        0.70f
-#define SLOW_SPEED           0.28f
+#define FORWARD_SPEED        0.4f
+#define SLOW_SPEED           0.2f
 #define SLOW_DISTANCE_MM     120u   // start slowing when this close
 #define STOP_DISTANCE_MM     60u    // stop if too close
 #define BACKUP_DISTANCE_MM   80.0f  // mm to back up after bump
-#define BACKUP_SPEED         0.5f
+#define BACKUP_SPEED         0.3f
 #define TURN_MIN_DEG         45u
 #define TURN_MAX_DEG         140u
-#define TURN_SPEED           0.55f
+#define TURN_SPEED           0.25f
 #define DEBOUNCE_MS          40u
 #define POLL_MS              30u
 
@@ -42,7 +42,7 @@ void run_maze_bump(void) {
     // Basic roaming loop: drive forward, slow on IR, debounce bumps, backup, random turn
     while (!application_yield) {
         // Read center IR
-        uint8_t dist = ir_get_distance(CENTER);
+        uint8_t dist = SLOW_DISTANCE_MM - 10u;// ir_get_distance(CENTER);
 
         // If very close, stop and wait a moment
         if (dist <= STOP_DISTANCE_MM) {
@@ -96,9 +96,9 @@ void run_maze_bump(void) {
             bool turn_left_dir = (r & 1u) == 0;
 
             if (turn_left_dir) {
-                turn_left_in_place((float)angle, TURN_SPEED);
+                turn_left((float)angle, TURN_SPEED);
             } else {
-                turn_right_in_place((float)angle, TURN_SPEED);
+                turn_right((float)angle, TURN_SPEED);
             }
 
             // small settle
