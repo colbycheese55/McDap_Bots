@@ -17,10 +17,10 @@ uint16_t i2c_send(I2C_Handle *i2cHandle, uint8_t target_address, uint8_t *buffer
 	HAL_StatusTypeDef status;
 
 	status = HAL_I2C_Master_Transmit(hi2c, device_address, buffer, count, 1000);
-	if (status == HAL_OK) {
+	if (status == HAL_OK) { // successful transmit
 		return TRUE;
 	}
-	else if (status == HAL_BUSY) {
+	else { // transmit failed
 		return FALSE;
 	}
 }
