@@ -22,7 +22,7 @@
  *
  * @param[in] i2cHandle       Pointer to the I2C handle for the peripheral.
  */
-void refsen_init(I2C_Handle *i2cHandle);
+void refsen_init(I2C_Handle i2cHandle);
 
 /**
  * @brief Read reflectance sensor values.

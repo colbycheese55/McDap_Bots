@@ -2,7 +2,6 @@
 #include "HighLevelDrivers/inc/images.h"
 #include "LowLevelDrivers/inc/i2c.h"
 
-
 void OLED_Example_App() {
     SSD1306_ClearBuffer(); // Clear the data buffer for the OLED controller
 

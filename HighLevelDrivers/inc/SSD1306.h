@@ -137,7 +137,7 @@ policies, either expressed or implied, of the FreeBSD Project.
  * @return success or failure
  * @note for ECE319K and ECE445L use vccst=SSD1306_SWITCHCAPVCC
  */
-int  SSD1306_Init(I2C_Handle* i2cHandle, int vccst);
+int  SSD1306_Init(I2C_Handle i2cHandle, int vccst);
 
 /**
  * Copy all of RAM image to OLED. Use this command with SSD1306_ClearBuffer, and all Draw functions

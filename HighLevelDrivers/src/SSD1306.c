@@ -86,7 +86,7 @@ int vccstate;
 // vccstate = SSD1306_SWITCHCAPVCC for normal internal 3.3V power
 //            SSD1306_EXTERNALVCC for separate external power
 int rotation;
-static I2C_Handle *i2c;
+static I2C_Handle i2c;
 
 // private function prototypes
 void ssd1306drawFastHLineInternal(int16_t x, int16_t y, int16_t w, uint16_t color);
@@ -412,7 +412,7 @@ void ssd1306command(uint8_t c) {
   uint16_t count = 2;
   uint8_t buffer[2] = {0, c};
 
-  i2c_send(i2c, target_address, buffer, count);
+  i2c_send(&i2c, target_address, buffer, count);
 }
 void ssd1306command1(uint8_t c) {
 //  commandwrite(c);
@@ -422,7 +422,7 @@ void ssd1306command1(uint8_t c) {
   uint16_t count = 2;
   uint8_t buffer[2] = {0, c};
 
-  i2c_send(i2c, target_address, buffer, count);
+  i2c_send(&i2c, target_address, buffer, count);
 
 }
 void ssd1306commandList(const uint8_t *c, uint32_t n) {
@@ -433,7 +433,7 @@ void ssd1306commandList(const uint8_t *c, uint32_t n) {
   buffer[0] = 0x00;
   memcpy(&buffer[1], c, n);
   uint16_t count = (uint16_t)n + 1;
-  i2c_send(i2c, target_address, (uint8_t *)buffer, count);
+  i2c_send(&i2c, target_address, (uint8_t *)buffer, count);
 //  while(n--) {
 //    commandwrite(*c);
 //    c++;
@@ -507,7 +507,7 @@ static const uint8_t init5[] = {
   SSD1306_DISPLAYON };                 // Main screen turn on
 // vccstate = SSD1306_SWITCHCAPVCC for normal internal 3.3V power
 //            SSD1306_EXTERNALVCC for separate external power
-int SSD1306_Init(I2C_Handle* i2cHandle, int vccst) {
+int SSD1306_Init(I2C_Handle i2cHandle, int vccst) {
 //  volatile uint32_t delay;
   // ClockDelay_1ms(300);
   i2c = i2cHandle;
@@ -1040,7 +1040,7 @@ void SSD1306_OutBuffer(void) {
     memcpy(&txbuf[1], ptr, bytes_to_send);
 
     // send control byte + this chunk of data
-    i2c_send(i2c, target_address, txbuf, bytes_to_send + 1);
+    i2c_send(&i2c, target_address, txbuf, bytes_to_send + 1);
 
     // advance buffer pointer
     ptr += bytes_to_send;
@@ -1082,7 +1082,7 @@ void SSD1306_DrawFullImage(const uint8_t *ptr){
     memcpy(&txbuf[1], ptr, bytes_to_send);
 
     // send control byte + this chunk of data
-    i2c_send(i2c, target_address, txbuf, bytes_to_send + 1);
+    i2c_send(&i2c, target_address, txbuf, bytes_to_send + 1);
 
     // advance buffer pointer
     ptr += bytes_to_send;
@@ -1423,7 +1423,7 @@ void SSD1306_OutChar(char data){//int i;
     buffer[0] = 0x40;
     memcpy(&buffer[1], (uint8_t *)&ASCII[data - 0x20], count);
 
-    i2c_send(i2c, target_address,buffer , count+1);
+    i2c_send(&i2c, target_address,buffer , count+1);
 //    for(i=0; i<5; i=i+1){
 //      datawrite(ASCII[data - 0x20][i]);//SPI version
 //    }
