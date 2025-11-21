@@ -49,9 +49,10 @@ float adc_get_voltage(ADC_Handle *adc, float vref) {
 
 
 // --------- ADC INTERRUPT HANDLER ---------
-void ADC12_0_INST_IRQHandler(void)
+void IR_SENSORS_INST_IRQHandler(void)
 {
-    if (DL_ADC12_getPendingInterrupt(adc_inst) == mem_result_loaded) {
+    // check if the ADC conversion memory has been populated with a new conversion result
+    if (DL_ADC12_getPendingInterrupt((const ADC12_Regs*) adc_inst) == mem_result_loaded) {
         adcDone = true;
     }
 }

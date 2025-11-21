@@ -31,21 +31,20 @@ const UART1  = UART.addInstance();
  */
 ADC121.enableDMA                         = false;
 ADC121.sampClkSrc                        = "DL_ADC12_CLOCK_ULPCLK";
-ADC121.repeatMode                        = true;
-ADC121.enabledInterrupts                 = ["DL_ADC12_INTERRUPT_MEM0_RESULT_LOADED"];
-ADC121.sampleTime0                       = "62.5ns";
 ADC121.adcMem0chansel                    = "DL_ADC12_INPUT_CHAN_3";
 ADC121.$name                             = "IR_SENSORS";
 ADC121.adcMem1chansel                    = "DL_ADC12_INPUT_CHAN_5";
-ADC121.enabledADCMems                    = [0,1,2];
+ADC121.sampClkDiv                        = "DL_ADC12_CLOCK_DIVIDE_8";
+ADC121.endAdd                            = 2;
+ADC121.samplingOperationMode             = "sequence";
+ADC121.enabledInterrupts                 = ["DL_ADC12_INTERRUPT_MEM2_RESULT_LOADED"];
+ADC121.powerDownMode                     = "DL_ADC12_POWER_DOWN_MODE_MANUAL";
+ADC121.sampleTime0                       = "40us";
 ADC121.adcMem2chansel                    = "DL_ADC12_INPUT_CHAN_1";
 ADC121.adcPin3Config.hideOutputInversion = scripting.forceWrite(false);
-ADC121.adcPin3Config.$name               = "ti_driverlib_gpio_GPIOPinGeneric12";
-ADC121.adcPin5Config.$name               = "ti_driverlib_gpio_GPIOPinGeneric13";
-ADC121.peripheral.adcPin3.$assign        = "PA24";
-ADC121.peripheral.adcPin5.$assign        = "PB24";
-ADC121.peripheral.adcPin1.$assign        = "PA26";
-ADC121.adcPin1Config.$name               = "ti_driverlib_gpio_GPIOPinGeneric14";
+ADC121.adcPin3Config.$name               = "ti_driverlib_gpio_GPIOPinGeneric4";
+ADC121.adcPin5Config.$name               = "ti_driverlib_gpio_GPIOPinGeneric6";
+ADC121.adcPin1Config.$name               = "ti_driverlib_gpio_GPIOPinGeneric7";
 
 const Board = scripting.addModule("/ti/driverlib/Board", {}, false);
 
@@ -151,11 +150,11 @@ PWM3.$name                              = "MOTOR_LEFT_M2";
 PWM3.peripheral.$assign                 = "TIMA0";
 PWM3.peripheral.ccp2Pin.$assign         = "PB4";
 PWM3.PWM_CHANNEL_2.$name                = "ti_driverlib_pwm_PWMTimerCC3";
+PWM3.ccp2PinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric8";
 PWM3.ccp2PinConfig.direction            = scripting.forceWrite("OUTPUT");
 PWM3.ccp2PinConfig.hideOutputInversion  = scripting.forceWrite(false);
 PWM3.ccp2PinConfig.onlyInternalResistor = scripting.forceWrite(false);
 PWM3.ccp2PinConfig.passedPeripheralType = scripting.forceWrite("Digital");
-PWM3.ccp2PinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric8";
 
 SYSCTL.forceDefaultClkConfig = true;
 SYSCTL.clockTreeEn           = true;
@@ -179,6 +178,9 @@ UART1.rxPinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric11";
  * re-solve from scratch.
  */
 ADC121.peripheral.$suggestSolution         = "ADC0";
+ADC121.peripheral.adcPin3.$suggestSolution = "PA24";
+ADC121.peripheral.adcPin5.$suggestSolution = "PB24";
+ADC121.peripheral.adcPin1.$suggestSolution = "PA26";
 Board.peripheral.$suggestSolution          = "DEBUGSS";
 Board.peripheral.swclkPin.$suggestSolution = "PA20";
 Board.peripheral.swdioPin.$suggestSolution = "PA19";

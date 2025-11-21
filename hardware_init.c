@@ -50,18 +50,19 @@ void hardware_init(void)
     ADC_Handle ir_left = {
         .adc12 = IR_SENSORS_INST,
         .channel = IR_SENSORS_ADCMEM_0,
-        .mem_result_loaded = DL_ADC12_IIDX_MEM0_RESULT_LOADED
+        .mem_result_loaded = DL_ADC12_IIDX_MEM2_RESULT_LOADED // use last ADC conversion memory in sequence
     };
     ADC_Handle ir_center = {
         .adc12 = IR_SENSORS_INST,
         .channel = IR_SENSORS_ADCMEM_1,
-        .mem_result_loaded = DL_ADC12_IIDX_MEM1_RESULT_LOADED
+        .mem_result_loaded = DL_ADC12_IIDX_MEM2_RESULT_LOADED // use last ADC conversion memory in sequence
     };
     ADC_Handle ir_right = {
         .adc12 = IR_SENSORS_INST,
         .channel = IR_SENSORS_ADCMEM_2,
-        .mem_result_loaded = DL_ADC12_IIDX_MEM2_RESULT_LOADED
+        .mem_result_loaded = DL_ADC12_IIDX_MEM2_RESULT_LOADED // use last ADC conversion memory in sequence
     };
+    NVIC_EnableIRQ(IR_SENSORS_INST_INT_IRQN); // Enable interrupt requests for ADC
     ir_init(ir_left, ir_center, ir_right);
 
     
