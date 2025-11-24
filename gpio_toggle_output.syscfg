@@ -1,8 +1,8 @@
 /**
  * These arguments were used when this file was generated. They will be automatically applied on subsequent loads
  * via the GUI or CLI. Run CLI with '--help' for additional information on how to override these arguments.
- * @cliArgs --device "MSPM0G350X" --part "Default" --package "LQFP-64(PM)" --product "mspm0_sdk@2.07.00.06"
- * @v2CliArgs --device "MSPM0G3507" --package "LQFP-64(PM)" --product "mspm0_sdk@2.07.00.06"
+ * @cliArgs --device "MSPM0G350X" --part "Default" --package "LQFP-64(PM)" --product "mspm0_sdk@2.06.00.06"
+ * @v2CliArgs --device "MSPM0G3507" --package "LQFP-64(PM)" --product "mspm0_sdk@2.06.00.06"
  * @versions {"tool":"1.25.0+4268"}
  */
 
@@ -89,9 +89,13 @@ GPIO3.associatedPins[1].$name       = "LED2";
 GPIO3.associatedPins[1].pin.$assign = "PB27";
 GPIO3.associatedPins[2].$name       = "BTN1";
 GPIO3.associatedPins[2].direction   = "INPUT";
+GPIO3.associatedPins[2].polarity    = "RISE";
+GPIO3.associatedPins[2].interruptEn = true;
 GPIO3.associatedPins[2].pin.$assign = "PA18";
 GPIO3.associatedPins[3].$name       = "BTN2";
 GPIO3.associatedPins[3].direction   = "INPUT";
+GPIO3.associatedPins[3].interruptEn = true;
+GPIO3.associatedPins[3].polarity    = "RISE";
 GPIO3.associatedPins[3].pin.$assign = "PB21";
 
 GPIO4.$name                         = "BLUETOOTH_GPIO";

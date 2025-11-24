@@ -10,6 +10,8 @@
 #include "HighLevelDrivers/inc/SSD1306.h"
 #include "HighLevelDrivers/inc/reflectance_sensor.h"
 
+#include "Application/inc/ApplicationSwitcher.h"
+
 
 #include "ti_msp_dl_config.h"
 
@@ -126,4 +128,31 @@ void hardware_init(void)
         .right_encoder_b = motor_right_b
     };
     motor_init(motors);
+
+    // MSPM user buttons
+    GPIO_Handle user_button_1 = {
+        .peripheral = MSPM0_USER_BTN1_PORT,
+        .pin = MSPM0_USER_BTN1_PIN
+    };
+    GPIO_Handle user_button_2 = {
+        .peripheral = MSPM0_USER_BTN2_PORT,
+        .pin = MSPM0_USER_BTN2_PIN
+    };
 }
+
+
+// // user button interrupts
+// void MSPM0_USER_GPIOA_INT_IRQN(void)
+// {
+//     // Clear the interrupt flag for user button 1
+//     DL_GPIO_clearInterruptFlag(MSPM0_USER_BTN1_PORT, MSPM0_USER_BTN1_PIN);
+
+//     application_yield = true;
+// }
+// void MSPM0_USER_GPIOB_INT_IRQN(void)
+// {
+//     // Clear the interrupt flag for user button 2
+//     DL_GPIO_clearInterruptFlag(MSPM0_USER_BTN2_PORT, MSPM0_USER_BTN2_PIN);
+
+//     application_yield = true;
+// }

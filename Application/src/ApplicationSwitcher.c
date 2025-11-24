@@ -38,6 +38,9 @@ void run_application_switcher() {
                 break;
             case FOLLOW_LINE:
                 // TODO: call line following application
+                while (!application_yield) {
+                    sleep_ms(10);
+                }
                 break;
             case RC:
                 // TODO: call bluetooth remote control application
