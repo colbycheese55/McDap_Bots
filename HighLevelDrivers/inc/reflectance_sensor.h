@@ -20,9 +20,9 @@
  * Configures the I2C peripheral pins via the IOMUX and prepares the sensor
  * driver for operation. Call this before calling refsen_read_values().
  *
- * @param[in] i2c       Pointer to the I2C register overlay for the peripheral.
+ * @param[in] i2cHandle       Pointer to the I2C handle for the peripheral.
  */
-void refsen_init(I2C_Regs *i2c);
+void refsen_init(I2C_Handle i2cHandle);
 
 /**
  * @brief Read reflectance sensor values.

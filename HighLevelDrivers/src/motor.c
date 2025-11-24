@@ -2,7 +2,7 @@
 #include "../../LowLevelDrivers/inc/gpio.h"
 #include "../../LowLevelDrivers/inc/pwm.h"
 
-#define QUADS_PER_REV   (360 * 4)
+#define QUADS_PER_REV   (360 * 2)
 #define WHEEL_DIAMETER  70    // in mm
 #define ROBOT_WIDTH     146   // in mm
 
@@ -98,7 +98,7 @@ void drive_straight_distance(float distance, float speed) {
     motor_set_speed_right(speed);
 
     float quads_needed = (distance / (3.14159 * WHEEL_DIAMETER)) * QUADS_PER_REV;
-    wait_on_quads_left((int)quads_needed);
+    wait_on_quads_right((int)quads_needed);
 
     motor_set_speed_left(0);
     motor_set_speed_right(0);

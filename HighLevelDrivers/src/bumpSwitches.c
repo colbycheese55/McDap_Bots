@@ -30,3 +30,10 @@ bool bump_switch_read(Switch sw) {
             return false;
     }
 }
+
+bool bump_switch_any_pressed() {
+    return bump_switch_read(FAR_LEFT) ||
+           bump_switch_read(MID_LEFT) ||
+           bump_switch_read(MID_RIGHT) ||
+           bump_switch_read(FAR_RIGHT);
+}

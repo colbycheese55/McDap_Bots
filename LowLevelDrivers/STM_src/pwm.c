@@ -1,8 +1,5 @@
-#include "../inc/pwm.h"
+#include "pwm.h"
 
-// --------------------------------------------------------
-//  Common helper
-// --------------------------------------------------------
 static uint32_t clamp_cc(uint32_t period, float duty) {
     if (duty < 0.f) duty = 0.f;
     if (duty > 1.f) duty = 1.f;
@@ -12,9 +9,9 @@ static uint32_t clamp_cc(uint32_t period, float duty) {
 }
 
 static inline void set_cc(PWM_Handle *h, uint32_t cmp) {
-    DL_TimerG_setCaptureCompareValue((GPTIMER_Regs*)h->peripheral,
-                                     cmp,
-                                     h->ccChannel);
+    __HAL_TIM_SET_COMPARE((TIM_HandleTypeDef*)h->peripheral,
+                          h->ccChannel,
+                          cmp);
 }
 
 void PWM_init(PWM_Handle *h,
@@ -32,16 +29,19 @@ void PWM_init(PWM_Handle *h,
     h->period     = clkHz / pwmHz;
     h->duty       = duty;
 
-    DL_TimerG_setLoadValue((GPTIMER_Regs*)peripheral, h->period);
+    // Set ARR
+    __HAL_TIM_SET_AUTORELOAD((TIM_HandleTypeDef*)peripheral, h->period);
+
+    // Set CCR
     set_cc(h, clamp_cc(h->period, duty));
 }
 
 void PWM_start(PWM_Handle *h) {
-    DL_TimerG_startCounter((GPTIMER_Regs *)h->peripheral);
+    HAL_TIM_PWM_Start((TIM_HandleTypeDef *)h->peripheral, h->ccChannel);
 }
 
 void PWM_stop(PWM_Handle *h) {
-    DL_TimerG_stopCounter((GPTIMER_Regs *)h->peripheral);
+    HAL_TIM_PWM_Stop((TIM_HandleTypeDef *)h->peripheral, h->ccChannel);
 }
 
 void PWM_setDuty(PWM_Handle *h, float duty) {
@@ -53,13 +53,6 @@ void PWM_setFrequency(PWM_Handle *h, uint32_t pwmHz) {
     if (pwmHz == 0) pwmHz = 1;
     h->period = h->clkHz / pwmHz;
 
-    DL_TimerG_setLoadValue((GPTIMER_Regs*)h->peripheral, h->period);
+    __HAL_TIM_SET_AUTORELOAD((TIM_HandleTypeDef*)h->peripheral, h->period);
     PWM_setDuty(h, h->duty);
 }
-
-// void PWM_stop(PWM_Handle *h)
-// {
-//     (void)h;
-//     DL_TimerG_stopCounter(PWM_0_INST);
-// }
-
