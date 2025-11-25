@@ -36,8 +36,8 @@ int main(void)
 {
     // SYSCFG_DL_init();  // pinmux + power + peripheral init (from SysConfig)
     hardware_init();
+    OLED_Example_App();
     run_application_switcher();
-    // OLED_Example_App();
 
 
     // while (1) {

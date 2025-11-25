@@ -30,6 +30,8 @@ void run_application_switcher() {
         motor_set_speed_right(0);
 
         application_yield = false;
+        line_follow_run();
+        continue;
 
         // current state logic
         switch (state) {

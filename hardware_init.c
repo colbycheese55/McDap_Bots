@@ -25,7 +25,7 @@ void hardware_init(void)
         .inst = I2C1
     };
     SSD1306_Init(i2c, SSD1306_SWITCHCAPVCC);
-    // refsen_init(&i2c);
+    refsen_init(i2c);
     
 
     // bump switches
