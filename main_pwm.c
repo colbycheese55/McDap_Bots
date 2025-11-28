@@ -1,122 +1,296 @@
-// main_pwm.c
-#include <stdint.h>
-#include "ti_msp_dl_config.h"      // brings in PWM_0_INST etc. + __NOP
-#include "LowLevelDrivers/inc/pwm.h"
-#include "HighLevelDrivers/inc/motor.h"
-#include "OLED_Example.h"
+// // main.c — MSPM0G3507 + CC26xx SNP (BOOSTXL-CC2650MA)
+// // BLE Joystick (iOS) compatible: HM-10 UART service 0xFFE0 / char 0xFFE1
+// // Mapping: 'A'/'a' => LED ON, 'B'/'b' => LED OFF, ignore '0' (release).
+// // We accept ANY Characteristic Write Indication (no handle filter), since
+// // actual attribute handles (e.g., 0x001E in your logs) can vary.
+// //
+// // IMPORTANT: iOS caches GATT. After flashing new GATT, "Forget" the device
+// // or toggle Bluetooth on iOS so it re-reads services/characteristics.
 
-#include "hardware_init.h"
+// #include <stdint.h>
+// #include <string.h>
+// #include <stdbool.h>
 
-// -------- Select which timer instances and CC indices you want to use --------
-// Example 1: both channels on the SAME timer instance (your current config)
-#define PWM_A_BASE   PWM_0_INST
-#define PWM_A_CCIDX  DL_TIMER_CC_0_INDEX   // CC0 (e.g., PA1 in your config)
+// #include "ti_msp_dl_config.h"
+// #include "HighLevelDrivers/inc/AP_MSPM0.h"
+// #include "LowLevelDrivers/inc/uart.h"
+// #include "LowLevelDrivers/inc/dbg_uart0.h"
+// #include <ti/driverlib/dl_gpio.h>
+// #include "hardware_init.h"
 
-#define PWM_B_BASE   PWM_0_INST
-#define PWM_B_CCIDX  DL_TIMER_CC_1_INDEX   // CC1 (e.g., PA0 LED in your config)
+// /* ===== Simple fallback debug helpers (link-safe) ===== */
+// static void DBG_dec(uint32_t v){
+//     char buf[12]; int i = sizeof(buf)-1; buf[i]=0;
+//     if(!v) buf[--i]='0'; while(v && i){ buf[--i]=(char)('0'+(v%10)); v/=10; }
+//     DBG_write(&buf[i]);
+// }
+// static void DBG_hex16(uint16_t v){
+//     static const char hx[]="0123456789ABCDEF"; char s[7];
+//     s[0]='0'; s[1]='x'; s[2]=hx[(v>>12)&0xF]; s[3]=hx[(v>>8)&0xF];
+//     s[4]=hx[(v>>4)&0xF]; s[5]=hx[v&0xF]; s[6]=0; DBG_write(s);
+// }
+// static void DBG_hexb(const uint8_t *p, uint16_t n){ DBG_hex(p, n); }
+// /* ===================================================== */
 
-// Example 2 (uncomment to use different timers if you add PWM_1_INST later):
-// #define PWM_A_BASE   PWM_0_INST
-// #define PWM_A_CCIDX  DL_TIMER_CC_0_INDEX
-// #define PWM_B_BASE   PWM_1_INST
-// #define PWM_B_CCIDX  DL_TIMER_CC_0_INDEX
+// #define SOF        0xFE
+// #define RECVSIZE   128
+// #define NAME       "MSPM0-CC26xx"
 
-// Timer clock (Hz). Your SysConfig sets BUSCLK = 32 MHz.
-#define TIMER_CLK_HZ   32000000u
+// static uint8_t rx[RECVSIZE];
 
-// static void delay_ms(uint32_t ms)
-// {
-//     volatile uint32_t cycles = ms * 1000u; // ~32 MHz -> ~1ms per 32000 loops
-//     while (cycles--) { __NOP(); }
+// /* ===== LED: PB27 now named MSPM0_USER_LED2 in SysConfig ===== */
+// #define LED_GPIO_PORT   MSPM0_USER_LED2_PORT
+// #define LED_GPIO_PIN    MSPM0_USER_LED2_PIN  // PB27
+
+// static inline void LED_init(void){
+//     DL_GPIO_clearPins(LED_GPIO_PORT, LED_GPIO_PIN);
+//     DL_GPIO_enableOutput(LED_GPIO_PORT, LED_GPIO_PIN);
+// }
+// static inline void LED_on(void)  { DL_GPIO_setPins  (LED_GPIO_PORT, LED_GPIO_PIN); }
+// static inline void LED_off(void) { DL_GPIO_clearPins(LED_GPIO_PORT, LED_GPIO_PIN); }
+
+// /* ===== Frame debug helpers ===== */
+// static void print_frame(const char *tag, const uint8_t *buf) {
+//     uint16_t len   = (uint16_t)buf[1] | ((uint16_t)buf[2] << 8);
+//     uint16_t total = (uint16_t)(1 + 2 + 2 + len + 1);
+//     DBG_write(tag); DBG_write(": "); DBG_hex(buf, total);
+// }
+// static int sendrx(const uint8_t *tx) {
+//     print_frame("TX", tx);
+//     int r = AP_SendMessageResponse((uint8_t*)tx, rx, RECVSIZE);
+//     if (r != APOK) { DBG_write("ERR: AP_SendMessageResponse failed\r\n"); return r; }
+//     print_frame("RX", rx);
+//     return r;
 // }
 
-int main(void)
-{
-    // SYSCFG_DL_init();  // pinmux + power + peripheral init (from SysConfig)
-    hardware_init();
+// /* ===== Basic diag ===== */
+// static const uint8_t MSG_GetStatus[]  = {SOF,0x00,0x00, 0x55,0x06, 0x00};
+// static const uint8_t MSG_GetVersion[] = {SOF,0x00,0x00, 0x35,0x03, 0x00};
 
-    // motor_set_speed_left(-0.2f);
-    // motor_set_speed_right(-0.2f);
+// /* ===== Advertising / Scan Response ===== */
+// static const uint8_t MSG_SetAdvData[] = {
+//     SOF, 11, 0x00,
+//     0x55, 0x43,       // Set Adv/ScanResp Data
+//     0x01,             // 0x01 = AdvData
+//     0x02, 0x01, 0x06, // Flags
+//     0x06, 0xFF,       // manufacturer data (dummy)
+//     0x0D, 0x00, 0x03, 0x00, 0x00,
+//     0x00
+// };
 
-    drive_straight_distance(500, 0.3);
-    turn_left(90, 0.1);
-    drive_straight_distance(2000, 1);
-    turn_right_in_place(180, 0.2);
+// static uint8_t MSG_SetScanRsp[64];
 
-    motor_set_speed_left(0);
-    motor_set_speed_right(0);
+// static const uint8_t MSG_StartAdv[] = {
+//     SOF, 14, 0x00,
+//     0x55, 0x42,   // Start Adv
+//     0x00,         // Connectable Undirected
+//     0x00, 0x00,   // infinite
+//     0x64, 0x00,   // ~100ms
+//     0x00, 0x00,
+//     0x00, 0x01, 0x00, 0x00, 0x00, 0xC5,
+//     0x02,
+//     0x00
+// };
 
-    // OLED_Example_App();
-    
+// /* Build Scan Response:
+//    - Complete Local Name
+//    - Conn Interval Range
+//    - Tx Power
+//    - Complete List of 16-bit UUIDs: 0xFFE0 (so the app finds us)
+// */
+// static void buildScanRsp(void) {
+//     uint8_t *p = MSG_SetScanRsp;
+//     *p++ = SOF;
+//     uint8_t *lenLSB = p++;
+//     uint8_t *lenMSB = p++;
+//     *p++ = 0x55; *p++ = 0x43; // Set Adv/ScanResp Data
+//     *p++ = 0x00;              // 0 = ScanRsp
 
-    // Open two logical PWM channels using the generic driver
-    // PWM_Handle chA, chB;
+//     // Complete Local Name
+//     const char *nm = NAME;
+//     uint8_t n = (uint8_t)strlen(nm);
+//     *p++ = (uint8_t)(1 + n);
+//     *p++ = 0x09; // Complete Local Name
+//     memcpy(p, nm, n); p += n;
 
-    // // Choose a human-visible PWM frequency for LED demos (1 kHz)
-    // const uint32_t pwmHz = 1000u;
+//     // Conn Interval Range
+//     *p++ = 0x05; *p++ = 0x12;
+//     *p++ = 0x50; *p++ = 0x00; // min 50ms
+//     *p++ = 0x20; *p++ = 0x03; // max 1.25s
 
-    // // Initialize both channels (can be same base or different bases)
-    // PWM_init(&chA, PWM_A_BASE, PWM_A_CCIDX, TIMER_CLK_HZ, pwmHz, 0.60f); // 60%
-    // PWM_init(&chB, PWM_B_BASE, PWM_B_CCIDX, TIMER_CLK_HZ, pwmHz, 0.30f); // 30%
+//     // Tx Power 0 dBm
+//     *p++ = 0x02; *p++ = 0x0A; *p++ = 0x00;
 
-    // // Start both underlying timers. (If both channels use the same base,
-    // // starting twice is harmless.)
-    // PWM_start(&chA);
-    // PWM_start(&chB);
-    // // Start both underlying timers. (If both channels use the same base,
-    // // starting twice is harmless.)
-    // PWM_start(&chA);
-    // PWM_start(&chB);
+//     // Complete List of 16-bit UUIDs: FFE0
+//     *p++ = 0x03; *p++ = 0x03;
+//     *p++ = 0xE0; *p++ = 0xFF;
 
-    // // ===== Case 1: BOTH ON =====
-    // // A = 60%, B = 30% (adjust to taste)
-    // PWM_setDuty(&chA, 0.60f);
-    // PWM_setDuty(&chB, 0.30f);
-    // delay_ms(1500);
-    // // ===== Case 1: BOTH ON =====
-    // // A = 60%, B = 30% (adjust to taste)
-    // PWM_setDuty(&chA, 0.60f);
-    // PWM_setDuty(&chB, 0.30f);
-    // delay_ms(1500);
+//     uint16_t plen = (uint16_t)((p - MSG_SetScanRsp) - 3);
+//     *lenLSB = (uint8_t)(plen & 0xFF);
+//     *lenMSB = (uint8_t)(plen >> 8);
+//     *p++ = 0x00; // FCS placeholder
+// }
 
-    // /* ===== Case 2: ONLY CC0 ON =====
-    //    Park CC1 by setting duty to 0% → PA0 LED steady/off.
-    //    CC0 keeps PWM (still not visible without a probe on PA1). */
-    // pwm_set_duty(DL_TIMER_CC_1_INDEX, load, 0.0f);   // PA0 steady
-    // pwm_set_duty(DL_TIMER_CC_0_INDEX, load, 0.70f);  // PA1 running (unseen)
-    // delay_ms(1500);
+// /* ===== GATT: HM-10 UART service (FFE0/FFE1) ===== */
+// static uint16_t gHandleFFE1 = 0;
 
-    // /* ===== Case 3: ONLY CC1 ON =====
-    //    Park CC0 (0%), run CC1 (LED) at 80% → PA0 LED bright PWM. */
-    // pwm_set_duty(DL_TIMER_CC_0_INDEX, load, 0.0f);   // PA1 parked
-    // pwm_set_duty(DL_TIMER_CC_1_INDEX, load, 0.80f);  // PA0 LED PWM
-    // delay_ms(1500);
+// // Add Service (Primary, 0xFFE0)
+// static const uint8_t MSG_AddService_FFE0[] = {
+//     SOF, 3, 0x00,
+//     0x35, 0x81,    // Add Service
+//     0x01,          // Primary
+//     0xE0, 0xFF,    // UUID 0xFFE0
+//     0x00
+// };
 
-    // /* Loop: repeat the three cases so you can observe on PA0 */
+// // Add Char Value (0xFFE1, WRITE | WRITE_NO_RSP)
+// static const uint8_t MSG_AddCharValue_FFE1[] = {
+//     SOF, 0x08, 0x00,
+//     0x35, 0x82,   // Add Char Value
+//     0x02,         // GATT Write Permission
+//     0x0C, 0x00,   // Properties = WWR + Write
+//     0x00,         // RFU
+//     0x00, 0x02,   // Max len = 512
+//     0xE1, 0xFF,   // UUID 0xFFE1
+//     0x00
+// };
 
-    // int count = 0;
-    // while (1) {
-    //     // // both on
-    //     // pwm_set_duty(DL_TIMER_CC_0_INDEX, load, 0.50f);
-    //     // pwm_set_duty(DL_TIMER_CC_1_INDEX, load, 0.10f);  // PA0 visible
-    //     // delay_ms(1000);
+// // Optional descriptor "UART RX"
+// static const uint8_t MSG_AddCharDesc_FFE1[] = {
+//     SOF, 12, 0x00,
+//     0x35, 0x83,
+//     0x80,          // User Description
+//     0x01,          // Readable
+//     0x08, 0x00,    // Max len
+//     0x08, 0x00,    // Initial len
+//     'U','A','R','T',' ','R','X',0,
+//     0x00
+// };
 
-    //     // // only CC0 (PA0 steady)
-    //     // pwm_set_duty(DL_TIMER_CC_1_INDEX, load, 0.0f);
-    //     // pwm_set_duty(DL_TIMER_CC_0_INDEX, load, 0.70f);
-    //     // delay_ms(1000);
+// // Register last-added service
+// static const uint8_t MSG_RegisterService[] = {
+//     SOF, 0x00, 0x00,
+//     0x35, 0x84,
+//     0x00
+// };
 
-    //     // // only CC1 (PA0 PWM)
-    //     // pwm_set_duty(DL_TIMER_CC_0_INDEX, load, 0.0f);
-    //     // pwm_set_duty(DL_TIMER_CC_1_INDEX, load, 0.50f);
-    //     // delay_ms(1000);
+// /* ===== Write Confirmation (if SNP asks) ===== */
+// static uint8_t MSG_WriteCnf[] = {
+//     SOF, 0x03, 0x00,
+//     0x55, 0x88,
+//     0x00,       // Success
+//     0x00, 0x00, // Conn handle
+//     0x00
+// };
 
-    //     pwm_set_duty(DL_TIMER_CC_0_INDEX, load, (count % 100) / 100.0);
-    //     pwm_set_duty(DL_TIMER_CC_1_INDEX, load, (count % 100) / 100.0);
-    //     count += 1;
-    //     delay_ms(50);
-    // }
-}
+// /* ===== Utilities ===== */
+// // For SNP Char Write Indication, f[1..2] is PAYLOAD length only (excludes cmd0/cmd1).
+// // Payload layout: conn(2) + attr(2) + resp(1) + offset(2) + data(N).
+// // So data length = len - 7 (if len > 7).
+// static inline uint16_t snp_write_payload_len(const uint8_t *f){
+//     uint16_t len_payload = (uint16_t)f[1] | ((uint16_t)f[2] << 8);
+//     const uint16_t payload_header = 2 + 2 + 1 + 2; // = 7
+//     return (len_payload > payload_header) ? (uint16_t)(len_payload - payload_header) : 0;
+// }
+
+// /* ===== Interpret BLE Joystick bytes ===== */
+// static void handle_bytes(const uint8_t *data, uint16_t n){
+//     for(uint16_t i=0;i<n;i++){
+//         char ch = (char)data[i];
+
+//         // Normalize case
+//         if (ch >= 'A' && ch <= 'Z') ch = (char)(ch + ('a' - 'A'));
+
+//         // Ignore '0' (release)
+//         if (ch == '0') {
+//             DBG_write("release ignored\r\n");
+//             continue;
+//         }
+
+//         if (ch == 'a') {
+//             LED_on();  DBG_write("LED -> ON  ('A'/'a')\r\n");
+//         } else if (ch == 'b') {
+//             LED_off(); DBG_write("LED -> OFF ('B'/'b')\r\n");
+//         } else {
+//             // other letters (c..h) not used yet
+//             DBG_write("ignored: "); DBG_hexb((const uint8_t*)&data[i],1); DBG_write("\r\n");
+//         }
+//     }
+// }
+
+// /* ===== BLE init + advertise ===== */
+// static void BLE_InitAndAdvertise(void){
+//     AP_Reset();
+
+//     (void)sendrx(MSG_GetStatus);
+//     (void)sendrx(MSG_GetVersion);
+
+//     // HM-10 UART service
+//     DBG_write("Add Service FFE0\r\n");
+//     (void)sendrx(MSG_AddService_FFE0);
+
+//     DBG_write("Add Char FFE1\r\n");
+//     (void)sendrx(MSG_AddCharValue_FFE1);
+//     gHandleFFE1 = ((uint16_t)rx[7] << 8) | rx[6];   // not required, handy for debug
+
+//     DBG_write("Add Desc FFE1\r\n");
+//     (void)sendrx(MSG_AddCharDesc_FFE1);
+
+//     DBG_write("Register Service (FFE0)\r\n");
+//     (void)sendrx(MSG_RegisterService);
+
+//     // Advertising
+//     buildScanRsp();
+//     (void)sendrx(MSG_SetAdvData);
+//     (void)sendrx(MSG_SetScanRsp);
+//     (void)sendrx(MSG_StartAdv);
+
+//     DBG_write("Advertising \"" NAME "\" with HM-10 UART service (FFE0/FFE1)\r\n");
+// }
+
+// /* ===== main ===== */
+// int main(void){
+//     SYSCFG_DL_init();   // UART0/1 + MRDY/SRDY/RESET + PB27 via SysConfig
+//     UART_initBLE();     // UART1 for SNP link (BLUETOOTH_INST in SysConfig)
+//     DBG_init();         // UART0 debug console
+//     LED_init();
+//     hardware_init();
+
+//     DBG_write("\r\n=== Boot (BLE Joystick HM-10 UART) ===\r\n");
+//     BLE_InitAndAdvertise();
+
+//     for(;;){
+//         if(AP_RecvStatus()){ // SRDY low: SNP has something
+//             if(AP_RecvMessage(rx, RECVSIZE) == APOK){
+//                 print_frame("RX", rx);
+
+//                 // Characteristic Write Indication (0x55/0x88)
+//                 if(rx[3] == 0x55 && rx[4] == 0x88){
+//                     // [5..6]=conn, [7..8]=attr handle, [9]=resp, [10..11]=offset, [12..]=data
+//                     uint16_t h = ((uint16_t)rx[8] << 8) | rx[7]; // debug
+//                     uint8_t  respNeeded = rx[9];
+//                     const uint8_t *data = &rx[12];
+
+//                     uint16_t payLen = snp_write_payload_len(rx); // <-- FIXED: len - 7
+
+//                     DBG_write("WRITE h="); DBG_hex16(h);
+//                     DBG_write(" len="); DBG_dec(payLen);
+//                     DBG_write(" data=");
+//                     if (payLen) DBG_hexb(data, 1);
+//                     DBG_write("\r\n");
+
+//                     if (payLen) handle_bytes(data, payLen);
+
+//                     if(respNeeded){
+//                         (void)AP_SendMessage(MSG_WriteCnf);
+//                         print_frame("TX", MSG_WriteCnf);
+//                     }
+//                 }
+//             }
+//         }
+//         AP_Delay1ms(1);
+//     }
+// }
 
 
 

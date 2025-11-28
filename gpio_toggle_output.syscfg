@@ -1,8 +1,8 @@
 /**
  * These arguments were used when this file was generated. They will be automatically applied on subsequent loads
  * via the GUI or CLI. Run CLI with '--help' for additional information on how to override these arguments.
- * @cliArgs --device "MSPM0G350X" --part "Default" --package "LQFP-64(PM)" --product "mspm0_sdk@2.07.00.06"
- * @v2CliArgs --device "MSPM0G3507" --package "LQFP-64(PM)" --product "mspm0_sdk@2.07.00.06"
+ * @cliArgs --device "MSPM0G350X" --part "Default" --package "LQFP-64(PM)" --product "mspm0_sdk@2.06.00.05"
+ * @v2CliArgs --device "MSPM0G3507" --package "LQFP-64(PM)" --product "mspm0_sdk@2.06.00.05"
  * @versions {"tool":"1.25.0+4268"}
  */
 
@@ -25,6 +25,7 @@ const PWM3   = PWM.addInstance();
 const SYSCTL = scripting.addModule("/ti/driverlib/SYSCTL");
 const UART   = scripting.addModule("/ti/driverlib/UART", {}, false);
 const UART1  = UART.addInstance();
+const UART2  = UART.addInstance();
 
 /**
  * Write custom configuration values to the imported modules.
@@ -95,15 +96,17 @@ GPIO3.associatedPins[3].$name       = "BTN2";
 GPIO3.associatedPins[3].direction   = "INPUT";
 GPIO3.associatedPins[3].pin.$assign = "PB21";
 
-GPIO4.$name                         = "BLUETOOTH_GPIO";
+GPIO4.$name                          = "BLUETOOTH_GPIO";
 GPIO4.associatedPins.create(3);
-GPIO4.associatedPins[0].$name       = "SLAVE_RDY";
-GPIO4.associatedPins[0].direction   = "INPUT";
-GPIO4.associatedPins[0].pin.$assign = "PB12";
-GPIO4.associatedPins[1].$name       = "MASTER_RDY";
-GPIO4.associatedPins[1].pin.$assign = "PA25";
-GPIO4.associatedPins[2].$name       = "RESET";
-GPIO4.associatedPins[2].pin.$assign = "PB13";
+GPIO4.associatedPins[0].$name        = "SLAVE_RDY";
+GPIO4.associatedPins[0].direction    = "INPUT";
+GPIO4.associatedPins[0].pin.$assign  = "PB12";
+GPIO4.associatedPins[1].$name        = "MASTER_RDY";
+GPIO4.associatedPins[1].initialValue = "SET";
+GPIO4.associatedPins[1].pin.$assign  = "PA25";
+GPIO4.associatedPins[2].$name        = "RESET";
+GPIO4.associatedPins[2].initialValue = "SET";
+GPIO4.associatedPins[2].pin.$assign  = "PB13";
 
 I2C1.$name                             = "I2C_BUS";
 I2C1.basicEnableController             = true;
@@ -161,6 +164,8 @@ SYSCTL.forceDefaultClkConfig = true;
 SYSCTL.clockTreeEn           = true;
 
 UART1.$name                            = "BLUETOOTH";
+UART1.targetBaudRate                   = 115200;
+UART1.peripheral.$assign               = "UART1";
 UART1.peripheral.rxPin.$assign         = "PA9";
 UART1.peripheral.txPin.$assign         = "PA8";
 UART1.txPinConfig.direction            = scripting.forceWrite("OUTPUT");
@@ -173,6 +178,13 @@ UART1.rxPinConfig.onlyInternalResistor = scripting.forceWrite(false);
 UART1.rxPinConfig.passedPeripheralType = scripting.forceWrite("Digital");
 UART1.rxPinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric11";
 
+UART2.$name                    = "UART_0";
+UART2.targetBaudRate           = 115200;
+UART2.peripheral.rxPin.$assign = "PA11";
+UART2.peripheral.txPin.$assign = "PA10";
+UART2.txPinConfig.$name        = "ti_driverlib_gpio_GPIOPinGeneric4";
+UART2.rxPinConfig.$name        = "ti_driverlib_gpio_GPIOPinGeneric6";
+
 /**
  * Pinmux solution for unlocked pins/peripherals. This ensures that minor changes to the automatic solver in a future
  * version of the tool will not impact the pinmux you originally saw.  These lines can be completely deleted in order to
@@ -184,4 +196,4 @@ Board.peripheral.swclkPin.$suggestSolution = "PA20";
 Board.peripheral.swdioPin.$suggestSolution = "PA19";
 I2C1.peripheral.$suggestSolution           = "I2C1";
 PWM2.peripheral.$suggestSolution           = "TIMG7";
-UART1.peripheral.$suggestSolution          = "UART1";
+UART2.peripheral.$suggestSolution          = "UART0";
