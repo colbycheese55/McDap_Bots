@@ -9,21 +9,19 @@
 extern "C" {
 #endif
 
-#ifdef STM32G071xx
+#ifdef STM32G071xx //STM32G071xx
 #include "stm32g0xx_hal.h"
 typedef struct {
     UART_HandleTypeDef *inst;   // bound to UART_1_INST
 } UART_Handle;
-
-#else
+#elif __MSPM0G3507__ // TI MSPM0
 #include "ti_msp_dl_config.h"
 #include <ti/driverlib/dl_uart_main.h>
 
 typedef struct {
     UART_Regs *inst;   // bound to UART_1_INST
 } UART_Handle;
-
-#endif //STM32G071xx
+#endif 
 
 /**
  * @brief Initialize/open the BLE UART (UART1) using the SysConfig settings.
