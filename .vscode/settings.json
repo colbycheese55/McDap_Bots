@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "ti_msp_dl_config.h": "c",
-        "clock.h": "c"
+        "clock.h": "c",
+        "applicationswitcher.h": "c"
     }
 }
