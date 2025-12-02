@@ -1,7 +1,10 @@
 #ifndef SLEEP_H_
 #define SLEEP_H_
 
+#ifdef STM32G071xx
+#elif __MSPM0G3507__
 #include "ti_msp_dl_config.h"
+#endif
 
 
 void inline sleep_us(uint32_t us) {

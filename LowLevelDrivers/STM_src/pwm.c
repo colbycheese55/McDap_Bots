@@ -36,6 +36,14 @@ void PWM_init(PWM_Handle *h,
     set_cc(h, clamp_cc(h->period, duty));
 }
 
+void PWM_start(PWM_Handle *h) {
+    HAL_TIM_PWM_Start((TIM_HandleTypeDef *)h->peripheral, h->ccChannel);
+}
+
+void PWM_stop(PWM_Handle *h) {
+    HAL_TIM_PWM_Stop((TIM_HandleTypeDef *)h->peripheral, h->ccChannel);
+}
+
 void PWM_setDuty(PWM_Handle *h, float duty) {
     h->duty = duty;
     set_cc(h, clamp_cc(h->period, duty));

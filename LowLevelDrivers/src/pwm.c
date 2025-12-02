@@ -36,6 +36,14 @@ void PWM_init(PWM_Handle *h,
     set_cc(h, clamp_cc(h->period, duty));
 }
 
+void PWM_start(PWM_Handle *h) {
+    DL_TimerG_startCounter((GPTIMER_Regs *)h->peripheral);
+}
+
+void PWM_stop(PWM_Handle *h) {
+    DL_TimerG_stopCounter((GPTIMER_Regs *)h->peripheral);
+}
+
 void PWM_setDuty(PWM_Handle *h, float duty) {
     h->duty = duty;
     set_cc(h, clamp_cc(h->period, duty));

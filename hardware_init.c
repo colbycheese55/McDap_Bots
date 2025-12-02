@@ -10,6 +10,8 @@
 #include "HighLevelDrivers/inc/SSD1306.h"
 #include "HighLevelDrivers/inc/reflectance_sensor.h"
 
+#include "Application/inc/ApplicationSwitcher.h"
+
 
 #include "ti_msp_dl_config.h"
 
@@ -19,8 +21,11 @@ void hardware_init(void)
     SYSCFG_DL_init();
 
     // Initialize I2C devices (OLED screen controller and reflectance sensor's GPIO expander)
-    SSD1306_Init(I2C1, SSD1306_SWITCHCAPVCC);
-    refsen_init(I2C1);
+    I2C_Handle i2c = {
+        .inst = I2C1
+    };
+    SSD1306_Init(i2c, SSD1306_SWITCHCAPVCC);
+    // refsen_init(&i2c);
     
 
     // bump switches
@@ -47,18 +52,19 @@ void hardware_init(void)
     ADC_Handle ir_left = {
         .adc12 = IR_SENSORS_INST,
         .channel = IR_SENSORS_ADCMEM_0,
-        .mem_result_loaded = DL_ADC12_IIDX_MEM0_RESULT_LOADED
+        .mem_result_loaded = DL_ADC12_IIDX_MEM2_RESULT_LOADED // use last ADC conversion memory in sequence
     };
     ADC_Handle ir_center = {
         .adc12 = IR_SENSORS_INST,
         .channel = IR_SENSORS_ADCMEM_1,
-        .mem_result_loaded = DL_ADC12_IIDX_MEM1_RESULT_LOADED
+        .mem_result_loaded = DL_ADC12_IIDX_MEM2_RESULT_LOADED // use last ADC conversion memory in sequence
     };
     ADC_Handle ir_right = {
         .adc12 = IR_SENSORS_INST,
         .channel = IR_SENSORS_ADCMEM_2,
-        .mem_result_loaded = DL_ADC12_IIDX_MEM2_RESULT_LOADED
+        .mem_result_loaded = DL_ADC12_IIDX_MEM2_RESULT_LOADED // use last ADC conversion memory in sequence
     };
+    NVIC_EnableIRQ(IR_SENSORS_INST_INT_IRQN); // Enable interrupt requests for ADC
     ir_init(ir_left, ir_center, ir_right);
 
     
@@ -122,4 +128,31 @@ void hardware_init(void)
         .right_encoder_b = motor_right_b
     };
     motor_init(motors);
+
+    // MSPM user buttons
+    GPIO_Handle user_button_1 = {
+        .peripheral = MSPM0_USER_BTN1_PORT,
+        .pin = MSPM0_USER_BTN1_PIN
+    };
+    GPIO_Handle user_button_2 = {
+        .peripheral = MSPM0_USER_BTN2_PORT,
+        .pin = MSPM0_USER_BTN2_PIN
+    };
 }
+
+
+// // user button interrupts
+// void MSPM0_USER_GPIOA_INT_IRQN(void)
+// {
+//     // Clear the interrupt flag for user button 1
+//     DL_GPIO_clearInterruptFlag(MSPM0_USER_BTN1_PORT, MSPM0_USER_BTN1_PIN);
+
+//     application_yield = true;
+// }
+// void MSPM0_USER_GPIOB_INT_IRQN(void)
+// {
+//     // Clear the interrupt flag for user button 2
+//     DL_GPIO_clearInterruptFlag(MSPM0_USER_BTN2_PORT, MSPM0_USER_BTN2_PIN);
+
+//     application_yield = true;
+// }

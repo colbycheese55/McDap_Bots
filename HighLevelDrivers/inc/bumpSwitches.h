@@ -18,4 +18,6 @@ void bump_switches_init(GPIO_Handle farLeft,
 
 bool bump_switch_read(Switch sw);
 
+bool bump_switch_any_pressed();
+
 #endif // BUMP_SWITCHES_H

@@ -5,6 +5,8 @@
 #include "HighLevelDrivers/inc/motor.h"
 #include "OLED_Example.h"
 #include "Application/inc/maze_bump.h"
+#include "LowLevelDrivers/inc/sleep.h"
+#include "Application/inc/ApplicationSwitcher.h"
 
 #include "hardware_init.h"
 
@@ -44,6 +46,18 @@ int main(void)
     motor_set_speed_right(0);
 
     // OLED_Example_App();
+
+
+    // while (1) {
+    //     drive_straight_distance(500, 0.3);
+    //     turn_left(90, 0.1);
+    //     drive_straight_distance(2000, 1);
+    //     turn_right_in_place(180, 0.2);
+    //     sleep_ms(3000);
+    // }
+    
+
+
     
 
     // Open two logical PWM channels using the generic driver
