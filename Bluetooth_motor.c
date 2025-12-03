@@ -16,7 +16,7 @@
 #include "LowLevelDrivers/inc/uart.h"
 #include "LowLevelDrivers/inc/dbg_uart0.h"
 #include "HighLevelDrivers/inc/motor.h"
-#include <ti/driverlib/dl_gpio.h>
+#include "LowLevelDrivers/inc/gpio.h"
 #include "hardware_init.h"
 
 /* ===== Simple fallback debug helpers (link-safe) ===== */
@@ -40,16 +40,31 @@ static void DBG_hexb(const uint8_t *p, uint16_t n){ DBG_hex(p, n); }
 static uint8_t rx[RECVSIZE];
 
 /* ===== LED: PB27 now named MSPM0_USER_LED2 in SysConfig ===== */
-#define LED_GPIO_PORT   MSPM0_USER_LED2_PORT
-#define LED_GPIO_PIN    MSPM0_USER_LED2_PIN  // PB27
+/* SysConfig still defines MSPM0_USER_LED2_PORT / PIN; we just wrap them. */
 
-static inline void LED_init(void){
-    DL_GPIO_clearPins(LED_GPIO_PORT, LED_GPIO_PIN);
-    DL_GPIO_enableOutput(LED_GPIO_PORT, LED_GPIO_PIN);
+static GPIO_Handle led2 = {
+    .peripheral = MSPM0_USER_LED2_PORT,  // e.g., (GPIO_Regs *)GPIOB
+    .pin        = MSPM0_USER_LED2_PIN    // bit mask for PB27
+};
+
+static inline void LED_init(void)
+{
+    /*
+     * Direction (output) is typically configured by SysConfig via SYSCFG_DL_init().
+     * Here we only ensure a known default state (off).
+     */
+    gpio_write_pin(led2, 0);
 }
-static inline void LED_on(void)  { DL_GPIO_setPins  (LED_GPIO_PORT, LED_GPIO_PIN); }
-static inline void LED_off(void) { DL_GPIO_clearPins(LED_GPIO_PORT, LED_GPIO_PIN); }
 
+static inline void LED_on(void)
+{
+    gpio_write_pin(led2, 1);
+}
+
+static inline void LED_off(void)
+{
+    gpio_write_pin(led2, 0);
+}
 /* ===== Frame debug helpers ===== */
 static void print_frame(const char *tag, const uint8_t *buf) {
     uint16_t len   = (uint16_t)buf[1] | ((uint16_t)buf[2] << 8);
