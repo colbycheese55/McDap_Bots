@@ -8,7 +8,8 @@
 #include "stm32g0xx_hal.h"
 
 typedef struct {
-	ADC_HandleTypeDef* hadc; //should already contain channel information
+	ADC_HandleTypeDef* hadc;
+	uint32_t channel;
 } ADC_Handle;
 
 #elif __MSPM0G3507__
