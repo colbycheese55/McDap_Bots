@@ -7,9 +7,9 @@
 #define B_IR 55244
 #define C_IR 7506171
 #define D_IR 0
-#define IRmaxl 2000
+#define IRmaxl 400
 
-#define FUDGE_FACTOR 5.3 // experimentally determined to match actual distances
+#define FUDGE_FACTOR 1.43 // experimentally determined to match actual distances
 
 ADC_Handle ir_left;
 ADC_Handle ir_center;
@@ -28,17 +28,10 @@ uint32_t ConvertDistanceSensorReading(uint32_t SensorInput)
 
 	// Convert ADC reading to distance (in millimeters) based on
     // transfer function in datasheet.
-	if (SensorInput < IRmaxl)
-    {
-        ReturnValue = 800;
-    }
-    else {
-        ReturnValue = (int64_t) C_IR;
-        ReturnValue = (int64_t)(B_IR*SensorInput) + ReturnValue;
-        ReturnValue = (int64_t)(A_IR*SensorInput*SensorInput) + ReturnValue;
-        ReturnValue = (int64_t)(K_IR/ReturnValue);
-
-    }
+    ReturnValue = (int64_t) C_IR;
+    ReturnValue = (int64_t)(B_IR*SensorInput) + ReturnValue;
+    ReturnValue = (int64_t)(A_IR*SensorInput*SensorInput) + ReturnValue;
+    ReturnValue = (int64_t)(K_IR/ReturnValue);
     return (uint32_t) ReturnValue;
 }
 
@@ -58,8 +51,14 @@ uint8_t ir_get_distance(IR_Sensor_Position position) {
     
     float percent = adc_get_value(adc);
     uint32_t reading = (uint32_t)(percent * 4095.0f); // convert back to a 12-bit reading
+    reading <<= 2; // reading should be 14 bits
     uint32_t distance = ConvertDistanceSensorReading(reading);
     distance /= FUDGE_FACTOR; 
+
+    if (distance > IRmaxl) {
+        distance = IRmaxl;
+    }
+
     return (uint8_t) distance;
 }
 
