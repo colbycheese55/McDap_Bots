@@ -28,10 +28,8 @@ void run_application_switcher() {
         // ensure the motors are stopped
         motor_set_speed_left(0);
         motor_set_speed_right(0);
-
         application_yield = false;
-        line_follow_run();
-        continue;
+        sleep_ms(1000);
 
         // current state logic
         switch (state) {

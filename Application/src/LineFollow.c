@@ -5,9 +5,9 @@
 #include "../../HighLevelDrivers/inc/motor.h"
 
 #define MIDPONT     7
-#define P           0 // TODO
-#define D           0 // TODO
-#define BASE_SPEED  0.3f
+#define P           0.10 // TODO
+#define D           0.0 // TODO
+#define BASE_SPEED  0.2f
 
 int8_t prev_error = 0;
 
@@ -49,11 +49,11 @@ void line_follow_run() {
 
         // dynamic velocity scaling based on error
         float translational_speed = BASE_SPEED;
-        float angular_speed = correction;
-        if (error > 1) {
-            translational_speed /= error;
-            angular_speed /= error;
-        }
+        float angular_speed = correction * BASE_SPEED;
+        // if (error > 1) {
+        //     translational_speed /= error;
+        //     angular_speed /= error;
+        // }
 
         drive_arc(translational_speed, angular_speed);
     }
