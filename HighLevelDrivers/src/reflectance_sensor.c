@@ -66,6 +66,6 @@ uint16_t refsen_read_values() {
     gpio_x_set_direction(INPUT);
 
     // wait a small delay and read the input values
-    sleep_us(100); // calibrating this determines how far away white and black surfaces can be detected
+    sleep_us(150); // calibrating this determines how far away white and black surfaces can be detected
     return gpio_x_read_inputs();
 }

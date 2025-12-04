@@ -12,8 +12,10 @@ typedef enum {
 
 void ir_init(ADC_Handle ir_left_handle, ADC_Handle ir_center_handle, ADC_Handle ir_right_handle);
 
-// Returns the measured distance in mm
-// Note that measurements less than 80mm are unreliable, and the maximum distance is about 150mm
+/* Returns the measured distance in mm
+*  Range is 0mm to 400mm from the front of the robot.
+*  Note: If no object is in range, the sensor oscillates between 200mm and 400mm.
+*/
 uint8_t ir_get_distance(IR_Sensor_Position position);
 
 
