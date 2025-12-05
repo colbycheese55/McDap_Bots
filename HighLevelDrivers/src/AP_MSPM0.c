@@ -1,3 +1,5 @@
+#ifdef __MSPM0G3507__
+
 #include "../inc/AP_MSPM0.h"
 #include "ti_msp_dl_config.h"
 
@@ -226,3 +228,4 @@ int AP_SendMessageResponse(uint8_t *msgOut, uint8_t *msgIn, uint32_t maxIn){
 }
 
 
+#endif

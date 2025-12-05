@@ -1,4 +1,5 @@
 #include "gpio.h"
+#include "stm32g0xx_hal.h"
 
 
 uint8_t gpio_read_pin(GPIO_Handle handle) {

@@ -1,4 +1,5 @@
 #include "../inc/uart.h"
+#include "stm32g0xx_hal.h"
 
 
 static UART_Handle g_uart1 = {0}; //Bluetooth UART

@@ -1,3 +1,5 @@
+#ifdef __MSPM0G3507__
+
 #ifndef AP_H
 #define AP_H
 /**
@@ -72,3 +74,4 @@ extern volatile uint32_t RecvCount;
 #endif
 
 #endif // AP_H
+#endif // __MSPM0G3507__

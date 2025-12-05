@@ -2,10 +2,17 @@
 #define SLEEP_H_
 
 #ifdef STM32G071xx
+
+void static inline sleep_ms(uint32_t ms) {
+    HAL_Delay(ms);
+}
+
+void static inline sleep_us(uint32_t us) {
+    // TODO
+}
+
 #elif __MSPM0G3507__
 #include "ti_msp_dl_config.h"
-#endif
-
 
 void inline sleep_us(uint32_t us) {
     uint32_t cycles = us * 32;  // assuming 32 MHz clock
@@ -17,4 +24,5 @@ void inline sleep_ms(uint32_t ms) {
     while (cycles--) { __NOP(); }
 }
 
+#endif // __MSPM0G3507__
 #endif /* SLEEP_H_ */
