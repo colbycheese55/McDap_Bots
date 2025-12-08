@@ -1,6 +1,7 @@
 #include "../inc/motor.h"
 #include "../../LowLevelDrivers/inc/gpio.h"
 #include "../../LowLevelDrivers/inc/pwm.h"
+#include "../HighLevelDrivers/inc/bumpSwitches.h"
 
 #define QUADS_PER_REV   (360 * 2)
 #define WHEEL_DIAMETER  70    // in mm
@@ -36,6 +37,23 @@ void wait_on_quads_right(uint32_t quads) {
             count++;
         }
     }
+}
+
+bool wait_on_quads_right_bump(uint32_t quads) {
+    uint32_t count = 0;
+    while (count < quads) {
+        uint8_t a = gpio_read_pin(motor.right_encoder_a);
+        uint8_t b = gpio_read_pin(motor.right_encoder_b);
+        if (a != quads_state_right[0] || b != quads_state_right[1]) {
+            quads_state_right[0] = a;
+            quads_state_right[1] = b;
+            count++;
+        }
+        if(bump_switch_any_pressed()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 float clamp(float value) {
@@ -102,6 +120,18 @@ void drive_straight_distance(float distance, float speed) {
 
     motor_set_speed_left(0);
     motor_set_speed_right(0);
+}
+
+bool drive_straight_distance_until_bump(float distance, float speed) {
+    motor_set_speed_left(speed);
+    motor_set_speed_right(speed);
+
+    float quads_needed = (distance / (3.14159 * WHEEL_DIAMETER)) * QUADS_PER_REV;
+    bool anyBump = wait_on_quads_right_bump((int)quads_needed);
+
+    motor_set_speed_left(0);
+    motor_set_speed_right(0);
+    return anyBump;
 }
 
 void turn_left(float angle, float speed) {

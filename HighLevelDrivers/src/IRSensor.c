@@ -35,7 +35,7 @@ uint32_t ConvertDistanceSensorReading(uint32_t SensorInput)
     return (uint32_t) ReturnValue;
 }
 
-uint8_t ir_get_distance(IR_Sensor_Position position) {
+uint32_t ir_get_distance(IR_Sensor_Position position) {
     ADC_Handle *adc;
     switch (position) {
         case LEFT:
@@ -59,7 +59,7 @@ uint8_t ir_get_distance(IR_Sensor_Position position) {
         distance = IRmaxl;
     }
 
-    return (uint8_t) distance;
+    return (uint32_t) distance;
 }
 
 
