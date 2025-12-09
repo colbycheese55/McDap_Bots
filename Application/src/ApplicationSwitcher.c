@@ -5,6 +5,8 @@
 #include "../../LowLevelDrivers/inc/sleep.h"
 #include "../inc/maze_bump.h"
 
+#include "../inc/LineFollow.h"
+
 #define INACTIVE        0
 #define FOLLOW_LINE     1
 #define RC              2
@@ -27,8 +29,8 @@ void run_application_switcher() {
         // ensure the motors are stopped
         motor_set_speed_left(0);
         motor_set_speed_right(0);
-
         application_yield = false;
+        sleep_ms(1000);
 
         // current state logic
         switch (state) {
@@ -38,10 +40,7 @@ void run_application_switcher() {
                 }
                 break;
             case FOLLOW_LINE:
-                // TODO: call line following application
-                while (!application_yield) {
-                    sleep_ms(10);
-                }
+                line_follow_run();
                 break;
             case RC:
                 // TODO: call bluetooth remote control application

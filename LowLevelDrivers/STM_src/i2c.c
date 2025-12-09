@@ -1,4 +1,5 @@
 #include "i2c.h"
+#include "stm32g0xx_hal.h"
 #define FALSE 0
 #define TRUE 1
 

@@ -25,7 +25,7 @@ void hardware_init(void)
         .inst = I2C1
     };
     SSD1306_Init(i2c, SSD1306_SWITCHCAPVCC);
-    // refsen_init(&i2c);
+    refsen_init(i2c);
     
 
     // bump switches
@@ -138,21 +138,13 @@ void hardware_init(void)
         .peripheral = MSPM0_USER_BTN2_PORT,
         .pin = MSPM0_USER_BTN2_PIN
     };
+    NVIC_EnableIRQ(MSPM0_USER_GPIOA_INT_IRQN);
+    NVIC_EnableIRQ(MSPM0_USER_GPIOB_INT_IRQN);
 }
 
 
 // // user button interrupts
-// void MSPM0_USER_GPIOA_INT_IRQN(void)
-// {
-//     // Clear the interrupt flag for user button 1
-//     DL_GPIO_clearInterruptFlag(MSPM0_USER_BTN1_PORT, MSPM0_USER_BTN1_PIN);
-
-//     application_yield = true;
-// }
-// void MSPM0_USER_GPIOB_INT_IRQN(void)
-// {
-//     // Clear the interrupt flag for user button 2
-//     DL_GPIO_clearInterruptFlag(MSPM0_USER_BTN2_PORT, MSPM0_USER_BTN2_PIN);
-
-//     application_yield = true;
-// }
+void GROUP1_IRQHandler(void)
+{
+    application_yield = true;
+}

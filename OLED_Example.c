@@ -5,9 +5,9 @@
 void OLED_Example_App() {
     SSD1306_ClearBuffer(); // Clear the data buffer for the OLED controller
 
-    SSD1306_DrawBMP(0,60,logo,14,SSD1306_WHITE); // draw the UT Austin logo
+    SSD1306_DrawBMP(0,60,ti,0,SSD1306_WHITE); // draw the UT Austin logo
     SSD1306_OutBuffer();  // Output to the OLED
 
-    SSD1306_SetCursor(0,0);
-    SSD1306_OutString("Happy Marc Merino Monday");   // Output a string to the display
+    // SSD1306_SetCursor(0,0);
+    // SSD1306_OutString("I'm Peter");
 }

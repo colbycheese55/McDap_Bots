@@ -1,8 +1,8 @@
 /**
  * These arguments were used when this file was generated. They will be automatically applied on subsequent loads
  * via the GUI or CLI. Run CLI with '--help' for additional information on how to override these arguments.
- * @cliArgs --device "MSPM0G350X" --part "Default" --package "LQFP-64(PM)" --product "mspm0_sdk@2.06.00.06"
- * @v2CliArgs --device "MSPM0G3507" --package "LQFP-64(PM)" --product "mspm0_sdk@2.06.00.06"
+ * @cliArgs --device "MSPM0G350X" --part "Default" --package "LQFP-64(PM)" --product "mspm0_sdk@2.07.00.05"
+ * @v2CliArgs --device "MSPM0G3507" --package "LQFP-64(PM)" --product "mspm0_sdk@2.07.00.05"
  * @versions {"tool":"1.25.0+4268"}
  */
 
@@ -25,6 +25,7 @@ const PWM3   = PWM.addInstance();
 const SYSCTL = scripting.addModule("/ti/driverlib/SYSCTL");
 const UART   = scripting.addModule("/ti/driverlib/UART", {}, false);
 const UART1  = UART.addInstance();
+const UART2  = UART.addInstance();
 
 /**
  * Write custom configuration values to the imported modules.
@@ -79,24 +80,26 @@ GPIO2.associatedPins[2].$name       = "MOTOR_RIGHT_A";
 GPIO2.associatedPins[2].direction   = "INPUT";
 GPIO2.associatedPins[2].pin.$assign = "PB9";
 GPIO2.associatedPins[3].$name       = "MOTOR_RIGHT_B";
+GPIO2.associatedPins[3].direction   = "INPUT";
 GPIO2.associatedPins[3].pin.$assign = "PA13";
 
-GPIO3.$name                         = "MSPM0_USER";
+GPIO3.$name                              = "MSPM0_USER";
 GPIO3.associatedPins.create(4);
-GPIO3.associatedPins[0].$name       = "LED1";
-GPIO3.associatedPins[0].pin.$assign = "PA0";
-GPIO3.associatedPins[1].$name       = "LED2";
-GPIO3.associatedPins[1].pin.$assign = "PB27";
-GPIO3.associatedPins[2].$name       = "BTN1";
-GPIO3.associatedPins[2].direction   = "INPUT";
-GPIO3.associatedPins[2].polarity    = "RISE";
-GPIO3.associatedPins[2].interruptEn = true;
-GPIO3.associatedPins[2].pin.$assign = "PA18";
-GPIO3.associatedPins[3].$name       = "BTN2";
-GPIO3.associatedPins[3].direction   = "INPUT";
-GPIO3.associatedPins[3].interruptEn = true;
-GPIO3.associatedPins[3].polarity    = "RISE";
-GPIO3.associatedPins[3].pin.$assign = "PB21";
+GPIO3.associatedPins[0].$name            = "LED1";
+GPIO3.associatedPins[0].pin.$assign      = "PA0";
+GPIO3.associatedPins[1].$name            = "LED2";
+GPIO3.associatedPins[1].pin.$assign      = "PB27";
+GPIO3.associatedPins[2].$name            = "BTN1";
+GPIO3.associatedPins[2].direction        = "INPUT";
+GPIO3.associatedPins[2].polarity         = "RISE";
+GPIO3.associatedPins[2].interruptEn      = true;
+GPIO3.associatedPins[2].pin.$assign      = "PA18";
+GPIO3.associatedPins[3].$name            = "BTN2";
+GPIO3.associatedPins[3].direction        = "INPUT";
+GPIO3.associatedPins[3].interruptEn      = true;
+GPIO3.associatedPins[3].polarity         = "RISE";
+GPIO3.associatedPins[3].internalResistor = "PULL_UP";
+GPIO3.associatedPins[3].pin.$assign      = "PB21";
 
 GPIO4.$name                         = "BLUETOOTH_GPIO";
 GPIO4.associatedPins.create(3);
@@ -164,6 +167,7 @@ SYSCTL.forceDefaultClkConfig = true;
 SYSCTL.clockTreeEn           = true;
 
 UART1.$name                            = "BLUETOOTH";
+UART1.targetBaudRate                   = 115200;
 UART1.peripheral.rxPin.$assign         = "PA9";
 UART1.peripheral.txPin.$assign         = "PA8";
 UART1.txPinConfig.direction            = scripting.forceWrite("OUTPUT");
@@ -175,6 +179,20 @@ UART1.rxPinConfig.hideOutputInversion  = scripting.forceWrite(false);
 UART1.rxPinConfig.onlyInternalResistor = scripting.forceWrite(false);
 UART1.rxPinConfig.passedPeripheralType = scripting.forceWrite("Digital");
 UART1.rxPinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric11";
+
+UART2.$name                            = "UART_0";
+UART2.targetBaudRate                   = 115200;
+UART2.peripheral.rxPin.$assign         = "PA11";
+UART2.peripheral.txPin.$assign         = "PA10";
+UART2.txPinConfig.direction            = scripting.forceWrite("OUTPUT");
+UART2.txPinConfig.hideOutputInversion  = scripting.forceWrite(false);
+UART2.txPinConfig.onlyInternalResistor = scripting.forceWrite(false);
+UART2.txPinConfig.passedPeripheralType = scripting.forceWrite("Digital");
+UART2.txPinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric9";
+UART2.rxPinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric12";
+UART2.rxPinConfig.hideOutputInversion  = scripting.forceWrite(false);
+UART2.rxPinConfig.onlyInternalResistor = scripting.forceWrite(false);
+UART2.rxPinConfig.passedPeripheralType = scripting.forceWrite("Digital");
 
 /**
  * Pinmux solution for unlocked pins/peripherals. This ensures that minor changes to the automatic solver in a future
@@ -191,3 +209,4 @@ Board.peripheral.swdioPin.$suggestSolution = "PA19";
 I2C1.peripheral.$suggestSolution           = "I2C1";
 PWM2.peripheral.$suggestSolution           = "TIMG7";
 UART1.peripheral.$suggestSolution          = "UART1";
+UART2.peripheral.$suggestSolution          = "UART0";

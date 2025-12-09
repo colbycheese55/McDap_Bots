@@ -1,4 +1,5 @@
 #include "pwm.h"
+#include "stm32g0xx_hal.h"
 
 static uint32_t clamp_cc(uint32_t period, float duty) {
     if (duty < 0.f) duty = 0.f;

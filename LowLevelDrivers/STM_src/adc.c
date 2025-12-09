@@ -1,4 +1,5 @@
 #include "../inc/adc.h"
+#include "stm32g0xx_hal.h"
 
 float adc_get_value(ADC_Handle *adc) {
 	ADC_ChannelConfTypeDef sConfig = {0};
