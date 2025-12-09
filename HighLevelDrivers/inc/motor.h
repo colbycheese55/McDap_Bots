@@ -82,6 +82,18 @@ void drive_arc(float translational_speed, float angular_speed);
 void drive_straight_distance(float distance, float speed);
 
 /**
+ * @brief Drive straight for a given distance (blocking) or until bump switch is triggered.
+ *
+ * Drives the robot forward (or backward if speed negative) until the
+ * requested linear distance has been traveled.
+ *
+ * @param distance Distance to travel in millimeters. Must be positive.
+ * @param speed    Speed in the range [-1.0, 1.0]. Direction is implied
+ *                 by the sign; positive moves forward.
+ */
+bool drive_straight_distance_until_bump(float distance, float speed);
+
+/**
  * @brief Perform a non-zero-radius left turn (arc) while driving (blocking).
  *
  * @param angle Angle in degrees (positive) to turn left.
