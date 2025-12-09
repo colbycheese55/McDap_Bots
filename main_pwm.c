@@ -2,7 +2,7 @@
 // #include <stdint.h>
 // #include "ti_msp_dl_config.h"      // brings in PWM_0_INST etc. + __NOP
 // #include "LowLevelDrivers/inc/pwm.h"
-// #include "HighLevelDrivers/inc/motor.h"
+#include "HighLevelDrivers/inc/motor.h"
 // #include "OLED_Example.h"
 // #include "LowLevelDrivers/inc/sleep.h"
 // #include "Application/inc/ApplicationSwitcher.h"

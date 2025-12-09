@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "../inc/ApplicationSwitcher.h"
+#include "../inc/MazeSolver.h"
 #include "../../HighLevelDrivers/inc/motor.h"
 #include "../../LowLevelDrivers/inc/sleep.h"
 #include "../inc/maze_bump.h"
@@ -14,7 +15,7 @@
 #define MAZE_BUMP       4
 
 volatile bool application_yield = false;
-uint8_t state = INACTIVE;
+uint8_t state = MAZE_IR;
 
 
 /** APPLICATION API
@@ -46,7 +47,10 @@ void run_application_switcher() {
                 // TODO: call bluetooth remote control application
                 break;
             case MAZE_IR:
-                // TODO: call maze IR application
+                while (!application_yield) {
+                    run_maze_solver();
+                    sleep_ms(10);
+                }
                 break;
             case MAZE_BUMP:
                 run_maze_bump();
