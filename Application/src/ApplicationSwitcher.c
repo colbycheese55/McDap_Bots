@@ -14,7 +14,7 @@
 #define MAZE_BUMP       4
 
 volatile bool application_yield = false;
-uint8_t state = MAZE_IR;
+uint8_t state = INACTIVE;
 
 
 /** APPLICATION API
