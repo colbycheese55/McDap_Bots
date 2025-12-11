@@ -674,22 +674,18 @@ void SSD1306_OutClear(void) {
     @param  color
             Pixel color, one of: SSD1306_BLACK, SSD1306_WHITE or SSD1306_INVERSE.
     @return None (void).
-    @note   Bitmaps defined above were created for the LM3S1968 or
-            LM3S8962's 4-bit grayscale OLED display.  More recently
-            they are created using Microsoft Paint (or your
-            favorite drawing program), saved as a 16-color bitmap,
-            and converted from binary to text using BmpConvert.exe.
-            Then copy and paste this text into the program, which
-            will create a constant containing the image that will
-            be loaded into ROM at compile time.  These images will
-            still contain their header data and may contain padding
-            to preserve 4-byte alignment.  This function takes a
-            bitmap in the previously described format and puts its
-            image data in the proper location in the buffer so the
-            image will appear on the screen after the next call to<br>
-              SSD1306_OutBuffer();<br>
-            The interface and operation of this process is modeled
-            after RIT128x96x4_BMP(x, y, image);
+    @note   Bitmaps are created using GIMP. Instructions for converting a .jpg to a bmp in GIMP are below:
+            Open your .jpg in GIMP.
+            Go to Image → Mode → Indexed...
+            Choose:
+                Generate optimum palette
+                Maximum number of colors: 16
+            Export the image: File → Export As → .bmp
+            Choose Compatibility Options → Do not write color space information
+            Export as (e.g., image16.bmp) , saved as a 16-color bitmap.
+            Convert from binary to text using the bmp_to_c_array.py
+            script in HighLevelDrivers/inc. 
+            Then add the resulting output array to images.h.
 */
 void SSD1306_DrawBMP(uint8_t xpos, uint8_t ypos, const uint8_t *ptr, uint8_t threshold, uint16_t color){
   int32_t width = ptr[18], height = ptr[22], i, j;
