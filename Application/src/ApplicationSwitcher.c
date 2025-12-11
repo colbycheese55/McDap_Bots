@@ -1,11 +1,14 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "../inc/ApplicationSwitcher.h"
-#include "../inc/MazeSolver.h"
+
 #include "../../HighLevelDrivers/inc/motor.h"
 #include "../../LowLevelDrivers/inc/sleep.h"
+#include "../../HighLevelDrivers/inc/SSD1306.h"
 
 #include "../inc/LineFollow.h"
+#include "../inc/MazeSolver.h"
+#include "../inc/BluetoothController.h"
 
 #define INACTIVE        0
 #define FOLLOW_LINE     1
@@ -35,23 +38,32 @@ void run_application_switcher() {
         // current state logic
         switch (state) {
             case INACTIVE:
+                SSD1306_ClearBuffer();
+                SSD1306_OutBuffer();
+                SSD1306_OutString("Inactive");
                 while (!application_yield) {
                     sleep_ms(10);
                 }
                 break;
             case FOLLOW_LINE:
+                SSD1306_ClearBuffer();
+                SSD1306_OutBuffer();
+                SSD1306_OutString("Running Line Follower");
                 line_follow_run();
                 break;
             case RC:
-                // TODO: call bluetooth remote control application
+                run_bluetooth_controller();
                 break;
             case MAZE_IR:
-                while (!application_yield) {
-                    run_maze_solver();
-                    sleep_ms(10);
-                }
+                SSD1306_ClearBuffer();
+                SSD1306_OutBuffer();
+                SSD1306_OutString("Running Maze Solver");
+                run_maze_solver();
                 break;
             case MAZE_BUMP:
+                SSD1306_ClearBuffer();
+                SSD1306_OutBuffer();
+                SSD1306_OutString("Running Prison Bot");
                 // TODO: call maze bump application
                 break;
         }
