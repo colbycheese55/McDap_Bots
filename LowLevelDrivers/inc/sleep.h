@@ -8,7 +8,8 @@ void static inline sleep_ms(uint32_t ms) {
 }
 
 void static inline sleep_us(uint32_t us) {
-    // TODO
+    uint32_t cycles = us * 2;
+    while (cycles--);
 }
 
 #elif __MSPM0G3507__
