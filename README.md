@@ -1,51 +1,50 @@
-## Example Summary
+# McDap Bots Pedagogical Robot
 
-Toggles three GPIO pins using HW toggle register.
+This project was created as a capstone project for the University of Virginia Department of Electrical and Computer Engineering. Our goal was to create a small robot which could be programmed by students, for use as a teaching aide in an embedded systems course. This repository contains the software component of this, both drivers and application code.
 
-## Peripherals & Pin Assignments
+**Authors**
+- Colby Wise
+- Pratik Pandit
+- Austen Yun 
+- David Merino
+- Marc Rosenthal
 
-| Peripheral | Pin | Function |
-| --- | --- | --- |
-| GPIOB | PB22 | Standard Output |
-| GPIOB | PB26 | Standard Output |
-| GPIOB | PB27 | Standard Output |
-| GPIOB | PB16 | Standard Output |
-| SYSCTL |  |  |
-| EVENT |  |  |
-| DEBUGSS | PA20 | Debug Clock |
-| DEBUGSS | PA19 | Debug Data In Out |
+**Advisors**: Todd DeLong and Adam Barnes 
 
-## BoosterPacks, Board Resources & Jumper Settings
+**Features at a glance**
+- 2 motors (PWM controlled), OLED screen (I2C), reflectance sensor (I2C), bump switches (GPIO), Bluetooth (UART), and infrared sensors (ADC)
+- battery charging port and battery voltage display (press button to enable)
+- support for TI and STM microcontrollers 
 
-Visit [LP_MSPM0G3507](https://www.ti.com/tool/LP-MSPM0G3507) for LaunchPad information, including user guide and hardware files.
 
-| Pin | Peripheral | Function | LaunchPad Pin | LaunchPad Settings |
-| --- | --- | --- | --- | --- |
-| PB22 | GPIOB | PB22 | J27_5 | <ul><li>PB22 can be connected to LED2 Blue<br><ul><li>`J5 ON` Connect to LED2 Blue<br><li>`J15 OFF` Disconnect from LED2 Blue</ul></ul> |
-| PB26 | GPIOB | PB26 | J27_8 | <ul><li>PB26 can be connected to LED2 Red<br><ul><li>`J6 ON` Connect to LED2 Red<br><li>`J6 OFF` Disconnect from LED2 Red</ul></ul> |
-| PB27 | GPIOB | PB27 | J27_10 | <ul><li>PB27 can be connected to LED2 Green<br><ul><li>`J7 ON` Connect to LED2 Green<br><li>`J7 OFF` Disconnect from LED2 Green</ul></ul> |
-| PB16 | GPIOB | PB16 | J2_11 | <ul><li>This pin can be used for testing purposes in boosterpack connector<ul><li>Pin can be reconfigured for general purpose as necessary</ul></ul> |
-| PA20 | DEBUGSS | SWCLK | N/A | <ul><li>PA20 is used by SWD during debugging<br><ul><li>`J101 15:16 ON` Connect to XDS-110 SWCLK while debugging<br><li>`J101 15:16 OFF` Disconnect from XDS-110 SWCLK if using pin in application</ul></ul> |
-| PA19 | DEBUGSS | SWDIO | N/A | <ul><li>PA19 is used by SWD during debugging<br><ul><li>`J101 13:14 ON` Connect to XDS-110 SWDIO while debugging<br><li>`J101 13:14 OFF` Disconnect from XDS-110 SWDIO if using pin in application</ul></ul> |
+## What is contained here
 
-### Device Migration Recommendations
-This project was developed for a superset device included in the LP_MSPM0G3507 LaunchPad. Please
-visit the [CCS User's Guide](https://software-dl.ti.com/msp430/esd/MSPM0-SDK/latest/docs/english/tools/ccs_ide_guide/doc_guide/doc_guide-srcs/ccs_ide_guide.html#sysconfig-project-migration)
-for information about migrating to other MSPM0 devices.
+**Low Level Drivers**
+These files are hardware-specific and interact directly with the physical hardware. TI drivers are in `LowLevelDrivers/src` and STM drivers are in `LowLevelDrivers/STM_src`. 
 
-### Low-Power Recommendations
-TI recommends to terminate unused pins by setting the corresponding functions to
-GPIO and configure the pins to output low or input with internal
-pullup/pulldown resistor.
+**High Level Drivers**
+These files represent a specific peripheral (ex. a motor) and are hardware-agnostic. They use hardware-specific low-level drivers to control the hardware
 
-SysConfig allows developers to easily configure unused pins by selecting **Board**→**Configure Unused Pins**.
+**Application**
+These files are different applications. The exception is `Application/ApplicationSwitcher.c`, which is used to switch between applications when the user button is pressed. 
 
-For more information about jumper configuration to achieve low-power using the
-MSPM0 LaunchPad, please visit the [LP-MSPM0G3507 User's Guide](https://www.ti.com/lit/slau873).
 
-## Example Usage
-Compile, load and run the example.
-RGB LEDs will toggle with red being opposite of blue and green.
+## How to use this code
 
-USER_TEST_PIN GPIO will mimic the behavior of the LED1 and LED3 pins on the
-BoosterPack header and can be used to verify the LED behavior.
+You can copy and paste code from this repo as needed. You can also directory create a project from this repo by...
+
+**TI**
+*Intended for a LP-MSPM0G3507*
+1. Import this repo as a project in [TI Code Composer Studio](https://www.ti.com/tool/CCSTUDIO) (CCS)
+2. Disable `LowLevelDrivers/STM_src/` from compiling by right clicking on the folder in CCS and selecting `Exclude from build`
+3. Build the project and flash it
+
+**STM**
+*Intended for a Nucleo-G071RB*
+1. Create a new project in [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html)
+2. Use the STM transfer script to copy files over from this repo into the STM project
+    - a. Run `python3 stm_transfer.py {path}` where path is the path of the STM32CubeIDE project
+    - b. Example: `python3 stm_transfer.py /Users/user/STM32CubeIDE/workspace_1.19.0/McDapBots_STM2`
+    - c. Note that on Windows, Python is commonly installed as `python` not `python3`
+3. Open the IOC file, and save it to generate hardware initialization code
+4. `main.c` is the only essential file that was not copied over. Make sure to call `hardware_init()` and `run_application_switcher()` (blocking) to setup hardware and run our applications  
