@@ -1,3 +1,5 @@
+#ifdef __MSPM0G3507__
+
 // main.c — MSPM0G3507 + CC26xx SNP (BOOSTXL-CC2650MA)
 // BLE Joystick control -> Drive motors (2-byte protocol)
 //
@@ -471,3 +473,6 @@ int run_bluetooth_controller(void){
         AP_Delay1ms(1);
     }
 }
+
+
+#endif // __MSPM0G3507__

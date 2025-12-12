@@ -52,7 +52,9 @@ void run_application_switcher() {
                 line_follow_run();
                 break;
             case RC:
+                #ifdef __MSPM0G3507__
                 run_bluetooth_controller();
+                #endif
                 break;
             case MAZE_IR:
                 SSD1306_ClearBuffer();

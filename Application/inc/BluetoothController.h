@@ -1,3 +1,5 @@
+#ifdef __MSPM0G3507__
+
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
@@ -13,3 +15,5 @@
 #include "HighLevelDrivers/inc/images.h"
 
 int run_bluetooth_controller(void);
+
+#endif // __MSPM0G3507__
