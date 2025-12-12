@@ -36,16 +36,7 @@ int main(void)
 {
     // SYSCFG_DL_init();  // pinmux + power + peripheral init (from SysConfig)
     hardware_init();
-
-    // Run only the maze-bump roaming behavior from main
-    run_maze_bump();
-
-    // Ensure motors are stopped if the routine returns
-    motor_set_speed_left(0);
-    motor_set_speed_right(0);
-
     // OLED_Example_App();
-    OLED_Example_App();
     run_application_switcher();
 
 
