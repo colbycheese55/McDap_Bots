@@ -52,12 +52,12 @@ shutil.copy(os.path.join("STM_init", "hardware_init.h"),
 def replace_in_file(file_path):
     pattern = r'#include\s+"(?:.*/)?(BASES).h"'.replace("BASES", "|".join(DRIVER_FILENAMES))
 
-    with open(file_path, 'r') as file:
+    with open(file_path, 'r', encoding="utf-8") as file:
         content = file.read()
 
     content = re.sub(pattern, lambda m: m.group(0)[0:-3] + "_lld.h\"", content)
 
-    with open(file_path, 'w') as file:
+    with open(file_path, 'w', encoding="utf-8") as file:
         file.write(content)
 
 for directory in DIRS_TO_COPY:
@@ -74,17 +74,17 @@ replace_in_file(os.path.join(stm_project_path, "Core", "Inc", "hardware_init.h")
 src_ioc_path = os.path.join("STM_init", "McDapBots_STM.ioc")
 dest_ioc_path = os.path.join(stm_project_path, [f for f in os.listdir(stm_project_path) if f.endswith('.ioc')][0])
 
-with open(dest_ioc_path, 'r') as file:
+with open(dest_ioc_path, 'r', encoding="utf-8") as file:
     content = file.read()
 ProjectManager_ProjectFileName = re.search(r'ProjectManager\.ProjectFileName=(.+)', content).group(1)
 ProjectManager_ProjectName = re.search(r'ProjectManager\.ProjectName=(.+)', content).group(1)
 
 shutil.copy2(src_ioc_path, dest_ioc_path)
-with open(dest_ioc_path, 'r') as file:
+with open(dest_ioc_path, 'r', encoding="utf-8") as file:
     content = file.read()
 content = re.sub(r'ProjectManager\.ProjectFileName=.+', f'ProjectManager.ProjectFileName={ProjectManager_ProjectFileName}', content)
 content = re.sub(r'ProjectManager\.ProjectName=.+', f'ProjectManager.ProjectName={ProjectManager_ProjectName}', content)
-with open(dest_ioc_path, 'w') as file:
+with open(dest_ioc_path, 'w', encoding="utf-8") as file:
     file.write(content)
 
 

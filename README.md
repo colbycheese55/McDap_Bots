@@ -48,3 +48,6 @@ You can copy and paste code from this repo as needed. You can also directory cre
     - c. Note that on Windows, Python is commonly installed as `python` not `python3`
 3. Open the IOC file, and save it to generate hardware initialization code
 4. `main.c` is the only essential file that was not copied over. Make sure to call `hardware_init()` and `run_application_switcher()` (blocking) to setup hardware and run our applications  
+5. Add `Application/inc`, `HighLevelDrivers/inc`, and `LowLevelDriver/inc` to the include path
+    - In CubeIDE: Project >> Properties >> C/C++ General >> Paths and Symbols >> Includes 
+6. 
