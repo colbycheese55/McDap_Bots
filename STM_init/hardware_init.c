@@ -144,6 +144,9 @@ void hardware_init(void)
         .peripheral = GPIOA,
         .pin = GPIO_PIN_5
     };
+
+    HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
 }
 
 void EXTI4_15_IRQHandler(void) {
