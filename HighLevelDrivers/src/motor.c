@@ -1,7 +1,7 @@
 #include "../inc/motor.h"
 #include "../../LowLevelDrivers/inc/gpio.h"
 #include "../../LowLevelDrivers/inc/pwm.h"
-#include "../HighLevelDrivers/inc/bumpSwitches.h"
+#include "../inc/bumpSwitches.h"
 
 #define QUADS_PER_REV   (360 * 2)
 #define WHEEL_DIAMETER  70    // in mm

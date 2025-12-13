@@ -8,6 +8,7 @@
 #define MOTOR_H
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "../../LowLevelDrivers/inc/gpio.h"
 #include "../../LowLevelDrivers/inc/pwm.h"
 
