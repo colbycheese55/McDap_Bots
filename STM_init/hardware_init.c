@@ -145,3 +145,10 @@ void hardware_init(void)
         .pin = GPIO_PIN_5
     };
 }
+
+void EXTI4_15_IRQHandler(void) {
+    if (__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_13) != 0) {
+        __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_13);  // Clear the pending bit
+        application_yield = true;
+    }
+}
