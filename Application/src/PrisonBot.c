@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "../inc/maze_bump.h"
+#include "../inc/PrisonBot.h"
 #include "../inc/ApplicationSwitcher.h" // for application_yield (extern)
 #include "../../HighLevelDrivers/inc/motor.h"
 #include "../../HighLevelDrivers/inc/bumpSwitches.h"
@@ -35,11 +35,8 @@ static uint32_t next_rand(void) {
     return lfsr;
 }
 
-static bool any_bump_pressed(void) {
-    return bump_switch_read(FAR_LEFT) || bump_switch_read(MID_LEFT) || bump_switch_read(MID_RIGHT) || bump_switch_read(FAR_RIGHT);
-}
 
-void run_maze_bump(void) {
+void run_prison_bot(void) {
     // Basic roaming loop: drive forward, slow on IR, debounce bumps, backup, random turn
     while (!application_yield) {
         // Read center IR
@@ -71,10 +68,10 @@ void run_maze_bump(void) {
         motor_set_speed_right(speed);
 
         // Poll bump switches, debounce briefly
-        if (any_bump_pressed()) {
+        if (bump_switch_any_pressed()) {
             // small debounce window
             sleep_ms(DEBOUNCE_MS);
-            if (!any_bump_pressed()) {
+            if (!bump_switch_any_pressed()) {
                 // false alarm
                 continue;
             }

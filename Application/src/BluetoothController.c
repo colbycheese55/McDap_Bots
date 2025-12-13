@@ -472,6 +472,7 @@ int run_bluetooth_controller(void){
         }
         AP_Delay1ms(1);
     }
+    return 0;
 }
 
 

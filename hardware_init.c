@@ -11,6 +11,7 @@
 #include "HighLevelDrivers/inc/reflectance_sensor.h"
 
 #include "Application/inc/ApplicationSwitcher.h"
+#include "Application/inc/LineFollow.h"
 
 
 #include "ti_msp_dl_config.h"
@@ -25,7 +26,9 @@ void hardware_init(void)
         .inst = I2C1
     };
     SSD1306_Init(i2c, SSD1306_SWITCHCAPVCC);
-    refsen_init(i2c);
+    if (LINE_FOLLOW_DISABLE == 0) {
+        refsen_init(i2c);
+    }
     
 
     // bump switches

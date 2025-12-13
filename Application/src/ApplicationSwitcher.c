@@ -9,16 +9,23 @@
 #include "../inc/LineFollow.h"
 #include "../inc/MazeSolver.h"
 #include "../inc/BluetoothController.h"
+#include "../inc/PrisonBot.h"
 
 #define INACTIVE        0
 #define FOLLOW_LINE     1
 #define RC              2
 #define MAZE_IR         3
-#define MAZE_BUMP       4
+#define PRISON_BOT      4
 
 volatile bool application_yield = false;
 uint8_t state = INACTIVE;
 
+
+void write_label(char* label) {
+    SSD1306_ClearBuffer();
+    SSD1306_OutBuffer();
+    SSD1306_OutString(label);
+}
 
 /** APPLICATION API
  *  - each application must be launched by a single function call
@@ -38,35 +45,30 @@ void run_application_switcher() {
         // current state logic
         switch (state) {
             case INACTIVE:
-                SSD1306_ClearBuffer();
-                SSD1306_OutBuffer();
-                SSD1306_OutString("Inactive");
+                write_label("Inactive");
                 while (!application_yield) {
                     sleep_ms(10);
                 }
                 break;
             case FOLLOW_LINE:
-                SSD1306_ClearBuffer();
-                SSD1306_OutBuffer();
-                SSD1306_OutString("Running Line Follower");
-                line_follow_run();
+                if (LINE_FOLLOW_DISABLE == 0) {
+                    write_label("Running Line Follower");
+                    line_follow_run();
+                }
                 break;
             case RC:
                 #ifdef __MSPM0G3507__
+                write_label("Running RC Controller");
                 run_bluetooth_controller();
                 #endif
                 break;
             case MAZE_IR:
-                SSD1306_ClearBuffer();
-                SSD1306_OutBuffer();
-                SSD1306_OutString("Running Maze Solver");
+                write_label("Running Maze Solver");
                 run_maze_solver();
                 break;
-            case MAZE_BUMP:
-                SSD1306_ClearBuffer();
-                SSD1306_OutBuffer();
-                SSD1306_OutString("Running Prison Bot");
-                // TODO: call maze bump application
+            case PRISON_BOT:
+                write_label("Running Prison Bot");
+                run_prison_bot();
                 break;
         }
 
@@ -82,9 +84,9 @@ void run_application_switcher() {
                 state = MAZE_IR;
                 break;
             case MAZE_IR:
-                state = MAZE_BUMP;
+                state = PRISON_BOT;
                 break;
-            case MAZE_BUMP:
+            case PRISON_BOT:
                 state = INACTIVE;
                 break;
         }
